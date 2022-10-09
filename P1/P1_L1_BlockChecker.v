@@ -1,13 +1,12 @@
-``elsif macro
 module BlockChecker (
     input             clk,
     input             reset,
     input      [ 7:0] in,
-    output reg        result,
-    output reg [63:0] word
+    output reg        result
 );
 
     integer nBegin, nEnd, flag;
+	 reg [63:0] word;
 
     always @(posedge clk, posedge reset) begin
         if (reset) begin

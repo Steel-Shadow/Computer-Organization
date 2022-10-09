@@ -31,15 +31,13 @@ module tb_bc;
 
     // Outputs
     wire        result;
-    wire [63:0] word;
 
     // Instantiate the Unit Under Test (UUT)
     BlockChecker uut (
         .clk   (clk),
         .reset (reset),
         .in    (in),
-        .result(result),
-        .word  (word)
+        .result(result)
     );
 
     initial begin
