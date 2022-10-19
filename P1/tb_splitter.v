@@ -34,7 +34,7 @@ module tb_splitter;
     wire [ 7:0] O4;
 
     // Instantiate the Unit Under Test (UUT)
-    splitter uut ( 
+    splitter uut (
         .A (A),
         .O1(O1),
         .O2(O2),
@@ -44,12 +44,12 @@ module tb_splitter;
 
     initial begin
         // Initialize Inputs
-        A = 32'b00000001000000110000000000000000;
+        A = 32'b00100001000000110000000000000000;
 
         // Wait 100 ns for global reset to finish
         #100;
-		$display("%d%d%d%d", O1, O2, O3, O4);
-		$display("%d",$signed(2'b01)>$signed(2'b11));
+        $display("%d%d%d%d", O1, O2, O3, O4);
+        $display("%d", $signed(2'b01) > $signed(2'b11));
         // Add stimulus here
 
     end

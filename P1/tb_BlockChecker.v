@@ -4,9 +4,9 @@
 // Company: 
 // Engineer:
 //
-// Create Date:   17:43:32 10/06/2022
+// Create Date:   18:02:06 10/06/2022
 // Design Name:   BlockChecker
-// Module Name:   D:/CO/p1/tb_BlockChecker.v
+// Module Name:   D:/CO/p1/tb_bc.v
 // Project Name:  p1
 // Target Device:  
 // Tool versions:  
@@ -28,8 +28,8 @@ module tb_BlockChecker;
     reg         clk;
     reg         reset;
     reg  [ 7:0] in;
-    reg  [63:0] word;
-    // Outputs 
+
+    // Outputs
     wire        result;
 
     // Instantiate the Unit Under Test (UUT)
@@ -37,10 +37,38 @@ module tb_BlockChecker;
         .clk   (clk),
         .reset (reset),
         .in    (in),
-        .result(result),
-        .word  (word)
+        .result(result)
     );
 
-   
+    initial begin
+        // Initialize Inputs
+        clk   = 0;
+        reset = 1;
+        in    = 0;
+
+        #1;
+        reset = 0;
+        // Add stimulus here
+        #4;
+        in = "h";
+        #10;
+        in = "i";
+        #10;
+        in = " ";
+        #10;
+        in = "b";
+        #10;
+        in = "e";
+        #10;
+        in = "g";
+        #10;
+        in = "i";
+        #10;
+        in = "n";
+        #10;
+        in = "a";
+    end
+
+    always #5 clk = ~clk;
 endmodule
 

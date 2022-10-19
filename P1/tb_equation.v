@@ -4,15 +4,15 @@
 // Company: 
 // Engineer:
 //
-// Create Date:   18:02:06 10/06/2022
-// Design Name:   BlockChecker
-// Module Name:   D:/CO/p1/tb_bc.v
+// Create Date:   21:17:06 10/10/2022
+// Design Name:   equation
+// Module Name:   D:/CO/P1/tb_equation.v
 // Project Name:  p1
 // Target Device:  
 // Tool versions:  
 // Description: 
 //
-// Verilog Test Fixture created by ISE for module: BlockChecker
+// Verilog Test Fixture created by ISE for module: equation
 //
 // Dependencies:
 // 
@@ -22,53 +22,53 @@
 // 
 ////////////////////////////////////////////////////////////////////////////////
 
-module tb_bc;
+module tb_equation;
 
     // Inputs
-    reg         clk;
-    reg         reset;
-    reg  [ 7:0] in;
+    reg        clk;
+    reg        reset;
+    reg  [7:0] in;
 
     // Outputs
-    wire        result;
+    wire       out;
 
     // Instantiate the Unit Under Test (UUT)
-    BlockChecker uut (
-        .clk   (clk),
-        .reset (reset),
-        .in    (in),
-        .result(result)
+    equation uut (
+        .clk  (clk),
+        .reset(reset),
+        .in   (in),
+        .out  (out)
     );
 
     initial begin
         // Initialize Inputs
-        clk   = 0;
+        clk   = 1;
         reset = 1;
-        in    = 0;
-
         #1;
         reset = 0;
-        // Add stimulus here
-        #4;
-        in = "h";
+        // Wait 100 ns for global reset to finish
+        #9;
+        in = "a";
         #10;
-        in = "i";
+        in = "+";
         #10;
-        in = " ";
+        in = "p";
         #10;
-        in = "b";
+        in = "*";
         #10;
-        in = "e";
+        in = "0";
         #10;
-        in = "g";
-        #10;
-        in = "i";
-        #10;
-        in = "n";
+        in = "=";
         #10;
         in = "a";
-    end
+        #10;
+        in = "*";
 
+
+
+        // Add stimulus here
+
+    end
     always #5 clk = ~clk;
 endmodule
 

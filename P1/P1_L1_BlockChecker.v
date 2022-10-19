@@ -1,18 +1,18 @@
 module BlockChecker (
-    input             clk,
-    input             reset,
-    input      [ 7:0] in,
-    output reg        result
+    input            clk,
+    input            reset,
+    input      [7:0] in,
+    output reg       result
 );
 
     integer nBegin, nEnd, flag;
-	 reg [63:0] word;
+    reg [63:0] word;
 
     always @(posedge clk, posedge reset) begin
         if (reset) begin
             result <= 1;
             flag   <= 0;
-            word   = 64'b0;
+            word = 64'b0;
             nBegin <= 0;
             nEnd   <= 0;
         end else begin
