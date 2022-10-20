@@ -7,8 +7,10 @@
 */**/.idea
 */**/out
 
-!*.java
 !src
+!*.java
+!*.md
 
 !*.circ
 !*.v
+!*.asm
