@@ -8,27 +8,20 @@ add, sub 按无符号加减法处理（不考虑溢出）。
 
   + 需要采用模块化和层次化设计。顶层有效的驱动信号要求包括且仅包括异步复位信号 reset（clk 请使用内置时钟模块）。
   
-+ 推荐同学们在设计 CPU 前请通读本章所有内容，以避免无谓的修改；在设计 CPU 时参考之后各节给出的要求与建议，形成 CPU 设计草稿，并回答思考题。请注意： 
-    + 设计草稿与思考题为必做内容，请合并为 CPU 设计文档提交。   
-
-    + 设计草稿形式与篇幅不限，电子版可采用文本、截屏等形式，纸质版可直接拍照。
-
-    + 最后需要提交的内容为：CPU 设计文档、Logisim 电路源文件。  
-
 + 通过课下测试并不意味着你的设计完全不存在问题，建议自行构造测试用例以验证设计的正确性（如果进行了相关工作，请写入设计文档，课上问答时将酌情加分）。
+
+output: Instr: 32 位指令信号  
+        RegWrite: GRF 写入控制信号  
+        RegAddr: GRF 5 位写入地址 
+        RegData: GRF 32 位写入数据  
+        MemWrite: DM 写入控制信号 
+        MemAddr: DM 5 位写入地址  
+        MemData: DM 32 位写入数据 
 
 ---
 ## 模块设计-数据通路
 
-![图 3](image/47bd5d7501a9dacc851b28e26e2dfeefe8848b59e4a472eb107a0893c39a79ed.png)  
-
-output: Instr: 32 位指令信号
-        RegWrite: GRF 写入控制信号
-        RegAddr: GRF 5 位写入地址
-        RegData: GRF 32 位写入数据
-        MemWrite: DM 写入控制信号
-        MemAddr: DM 5 位写入地址
-        MemData: DM 32 位写入数据
+![图 3](image/47bd5d7501a9dacc851b28e26e2dfeefe8848b59e4a472eb107a0893c39a79ed.png)
 
 ### IFU（取指令单元）
 
@@ -98,7 +91,7 @@ beq ALU_op=3 beq=1
 if (GPR[rs] == GPR[rt]) PC <- PC + 4 + sign_extend(offset||00) else PC <- PC + 4
 ```
 
-lui GPR[rt] <- immediate || 1'b0{16} R/I=1 lui=1
+lui GPR[rt] <- immediate || 1'b0{16} R/I=1 lui=1 RgeWrite=1
 
 nop pc <- pc + 4 (其余上述指令略写该步)
 
