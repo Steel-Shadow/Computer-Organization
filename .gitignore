@@ -7,9 +7,15 @@
 */**/.idea
 */**/out
 
+!logisim-win-2.7.1.exe
+
 !src
 !*.java
+
 !*.md
+!*.txt
+!image
+!*.png
 
 !*.circ
 !*.v
