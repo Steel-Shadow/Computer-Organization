@@ -72,7 +72,6 @@ MemData: DM 32 位写入数据
 ---
 ### EXT（扩展单元）
 
-可以使用 Logisim 内置的 Bit Extender。
 zero_EXT_16 用于lui  
 sign_EXT_2 用于beq
 
@@ -81,9 +80,9 @@ sign_EXT_2 用于beq
 
 add, sub, ori, lw, sw, beq, lui, nop
 
-| 控制信号 | R/I               | ALU_op | RegWrite | ori      | lw_or_sw    | MemWrite | beq      | lui      |
-| -------- | ----------------- | ------ | -------- | -------- | ----------- | -------- | -------- | -------- |
-| 含义     | GRF写入寄存器选择 | ALU_op | GRF读写  | ori时为1 | lw或sw时为1 | MemWrite | beq时为1 | lui时为1 |
+| 控制信号 | R/I               | ALU_op | RegWrite | MemWrite | beq      | lui      | ori      | lw_or_sw    | jump                            |
+| -------- | ----------------- | ------ | -------- | -------- | -------- | -------- | -------- | ----------- | ------------------------------- |
+| 含义     | GRF写入寄存器选择 | ALU_op | GRF读写  | MemWrite | beq时为1 | lui时为1 | ori时为1 | lw或sw时为1 | j类型指令时为1，next_PC选择信号 |
 Tips：上表中，对应指令不注明的控制信号都为0
 
 ALU_op 对应的 +-|compare(>1 ==0 <-1)
