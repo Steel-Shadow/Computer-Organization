@@ -32,6 +32,10 @@ output: Instr: 32 位指令信号
 + IM（指令存储器）用 ROM 实现，容量为 32bit × 32字。IM 实际地址宽度仅为 5 位
 
 ---
+### NPC next_PC计算单元
+
+
+---
 ### splitter 指令解析器
 输入端口 instruction  
 输出机器码对应的01串    
@@ -105,6 +109,32 @@ if (GPR[rs] == GPR[rt]) PC <- PC + 4 + sign_extend(offset||00) else PC <- PC + 4
 lui GPR[rt] <- immediate || 1'b0{16} R/I=1 lui=1 RgeWrite=1
 
 nop pc <- pc + 4 (其余上述指令略写该步)
+
+以下为额外拓展指令      
+### 跳转：
+j
+
+jalr PC <- GPR[rs] GPR[rd] <- PC + 4 
+
+### 计算：
+
+sll GPR[rd] <- GPR[rt] << s   
+警告！ 尚未测试！！！
+
+### 内存：
+
+lh     
+Addr <- GPR[base] + sign_ext(offset)    
+memword <- memory[Addr]   
+byte <- Addr1   
+GPR[rt] <- sign_ext(memword15+16*byte..16*byte)      
+
+---
+##  测试方案
+
+对额外添加的 j jalr 进行了测试 附机器码文档
+
+sll 尚未测试
 
 ---
 ## 思考题
