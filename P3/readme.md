@@ -68,6 +68,8 @@ compare a>b 1 a==b 0 a<b -1
 起始地址：0x00000000。
 RAM 应使用双端口模式，即设置 RAM 的 Data Interface 属性为 Separate load and store ports。
 
+>*注意 注意 注意 在测试中将容量修改为了 1024字 ！！！*
+
 reset
 MemWrite: DM 写入控制信号
 MemAddr: DM 5 位写入地址
@@ -89,7 +91,7 @@ add, sub, ori, lw, sw, beq, lui, nop
 | 含义     | GRF写入寄存器选择 | ALU_op | GRF读写  | MemWrite | beq时为1 | lui时为1 | ori时为1 | lw或sw时为1 | j类型指令时为1，next_PC选择信号 |
 Tips：上表中，对应指令不注明的控制信号都为0
 
-ALU_op 对应的 +-|compare(>1 ==0 <-1)
+ALU_op 对应的 +-|compare(>1 ==0 <-1) 左移 
 
 add GPR[rd] <- GPR[rs] + GPR[rt] R/I=0 ALU_op=0 RegWrite=1 
 
@@ -110,17 +112,21 @@ lui GPR[rt] <- immediate || 1'b0{16} R/I=1 lui=1 RgeWrite=1
 
 nop pc <- pc + 4 (其余上述指令略写该步)
 
-以下为额外拓展指令      
+### 额外拓展指令      
 ### 跳转：
-j
+j j=1
 
 jalr PC <- GPR[rs] GPR[rd] <- PC + 4 
+
+jal j=1 RegWrite=1  jal=1
+PC <- PC31..28 || instr_index || 0^2  
+GPR[31] <- PC + 4
+
 
 ### 计算：
 
 sll GPR[rd] <- GPR[rt] << s   
-警告！ 尚未测试！！！
-
+ALU_op = 4
 ### 内存：
 
 lh     
@@ -132,9 +138,8 @@ GPR[rt] <- sign_ext(memword15+16*byte..16*byte)
 ---
 ##  测试方案
 
-对额外添加的 j jalr 进行了测试 附机器码文档
-
-sll 尚未测试
+修改初始栈指针，程序末尾将寄存器的数值压栈，只需比对 DM 即可判断 cpu 正确
+对额外添加的 j jalr sll lh 进行了测试 附机器码文档
 
 ---
 ## 思考题
