@@ -15,6 +15,7 @@
 !*.md
 !*.txt
 !image
+!images
 !*.png
 
 !*.circ
