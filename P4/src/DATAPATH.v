@@ -19,8 +19,8 @@ module DATAPATH (
     input [2:0] alu_op,
     input [2:0] alu_b_op,
 
-    input         mem_write,
-    
+    input mem_write,
+
     output [31:0] instr
 );
     //PC 
@@ -38,10 +38,10 @@ module DATAPATH (
         .reset(reset),
 
         .next_pc_op(next_pc_op),
-        .in0       (pc + 32'b1),                                                            //pc+4 
-        .in1       (alu_out == 32'b0 ? pc + 4 + {{14{imm[15]}}, imm, 2'b00} : pc + 32'd4),  //beq alu_out==0 pc<-pc+4+sign_ext_offset||00
-        .in2       ({pc[31:28], j_address, 2'b00}),                                         //jal PC31..28 || instr_index || 0^2
-        .in3       (read1),                                                                 //jr PC <- GPR[rs]
+        .in0       (pc + 32'd4),                                                                //pc+4 
+        .in1       (alu_out == 32'b0 ? pc + 32'd4 + {{14{imm[15]}}, imm, 2'b00} : pc + 32'd4),  //beq alu_out==0 pc<-pc+4+sign_ext_offset||00
+        .in2       ({pc[31:28], j_address, 2'b00}),                                             //jal PC31..28 || instr_index || 0^2
+        .in3       (read1),                                                                     //jr PC <- GPR[rs]
         .in4       (),
         .in5       (),
         .in6       (),
@@ -59,7 +59,6 @@ module DATAPATH (
     );
 
     // MUX_4 GRF的reg_addr选择
-
     MUX_4 #(
         .DATA_WIDTH(5)
     ) u_MUX_4_GRF_reg_addr (
@@ -73,8 +72,6 @@ module DATAPATH (
     );
 
     // MUX_8 GRF的reg_data选择        
-
-
     MUX_8 #(
         .DATA_WIDTH(32)
     ) u_MUX_8_GRF_reg_data (
@@ -98,7 +95,7 @@ module DATAPATH (
         .clk      (clk),
         .pc       (pc),
         .reg_write(reg_write),
-        .a1       (a1_op ? rt : rd),  //sll时选择rt
+        .a1       (a1_op ? rt : rs),  //sll时选择rt
         .a2       (rt),               //rt
         .reg_addr (reg_addr),
         .reg_data (reg_data),

@@ -12,6 +12,9 @@
 !src
 !*.java
 
+!datapath
+!*.wcfg
+
 !test
 
 !*.md

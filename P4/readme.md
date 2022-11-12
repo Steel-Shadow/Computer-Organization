@@ -1,5 +1,5 @@
 # cpu 设计文档
-problem: im 地址为32位的 pc 是否需要截取12位
+# 请删除反汇编 DASM !!!
 
 ## 设计说明
 处理器为 32 位单周期处理器，不考虑延迟槽，应支持的指令集为：
@@ -63,7 +63,7 @@ add, sub, ori, lw, sw, beq, lui, jal, jr, nop
     访存字地址 addr 由 ALU 计算产生。ALU 的结算结果 addrByte，但 DM 按字编址，访存地址 addr = addrByte/4。
 
 2.  思考上述两种控制器设计的译码方式，给出代码示例，并尝试对比各方式的优劣。
-    
+
     指令对应的控制信号如何取值
     方便指令添加，利于指令控制信号检查
     指令关系不明朗，需另外标注分组
@@ -78,7 +78,7 @@ add, sub, ori, lw, sw, beq, lui, jal, jr, nop
     同步复位： clk 优先级更高， 当 clk 上升沿且 reset 为 1 时，才触发复位
 
 4. C 语言是一种弱类型程序设计语言。C 语言中不对计算结果溢出进行处理，这意味着 C 语言要求程序员必须很清楚计算结果是否会导致溢出。因此，如果仅仅支持 C 语言，MIPS 指令的所有计算指令均可以忽略溢出。 请说明为什么在忽略溢出的前提下，addi 与 addiu 是等价的，add 与 addu 是等价的。提示：阅读《MIPS32? Architecture For Programmers Volume II: The MIPS32? Instruction Set》中相关指令的 Operation 部分 。
-    
+
     addi
     temp <- (GPR[rs]31 || GPR[rs]) + sign_extend(immediate)
     if temp32 ≠ temp31 then
@@ -91,4 +91,3 @@ add, sub, ori, lw, sw, beq, lui, jal, jr, nop
     GPR[rt] <- GPR[rs] + sign_extend(immediate)
 
     addi 指令中的 temp 和 addiu 的右值的区别在于，最高位拼接了 GPR[rs]的最高位，但是0~31位是相同的。
-

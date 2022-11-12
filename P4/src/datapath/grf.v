@@ -28,7 +28,7 @@ $display("@%h: $%d <= %h", WPC, Waddr, WData);
                 registers[i] <= 0;
             end
         end else begin
-            if (reg_write) begin
+            if (reg_write & (reg_addr != 5'd0)) begin
                 $display("@%h: $%d <= %h", pc, reg_addr, reg_data);
                 registers[reg_addr] <= reg_data;
             end

@@ -5,11 +5,14 @@ module IM (
     // IM ÈÝÁ¿Îª 16KiB£¨4096 ¡Á 32bit£©
     // °´×ÖÑ°Ö·
     initial begin
-        $readmemh("test_add.txt");
+        $readmemh("code.txt", inst_mem);
     end
 
-    reg [31:0] inst_mem[4095:0];
+    reg  [31:0] inst_mem [1023:0];
 
-    assign instr = inst_mem[pc[13:2]];
+    wire [31:0] pc_index;
+    
+    assign pc_index = pc - 32'h3000;
+    assign instr    = inst_mem[pc_index[13:2]];
 
 endmodule

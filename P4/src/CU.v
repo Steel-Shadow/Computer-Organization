@@ -118,8 +118,8 @@ module CU (
         a1_op     = sll;
 
         //rd-0 rt-1 $ra=31-2 
-        if (add | sub | ori | sll) reg_addr_op = 2'd0;  //rd
-        else if (lw | lui) reg_addr_op = 2'd1;  //rt
+        if (add | sub | sll) reg_addr_op = 2'd0;  //rd
+        else if (lw | lui | ori) reg_addr_op = 2'd1;  //rt
         else if (jal) reg_addr_op = 2'd2;  //$ra $31
         else reg_addr_op = 2'd3;  //error
 

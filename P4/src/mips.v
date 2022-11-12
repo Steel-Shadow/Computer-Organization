@@ -77,6 +77,6 @@ module mips (
         .alu_b_op   (alu_b_op),
         .mem_write  (mem_write),
 
-        .instr      (instr)
+        .instr(instr)
     );
 endmodule

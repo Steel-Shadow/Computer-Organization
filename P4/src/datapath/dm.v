@@ -24,7 +24,7 @@ module DM (
             end
         end else begin
             if (mem_write) begin
-                $display("@%h: *%h <= %h", pc, {4'b0000, mem_addr}, mem_data);
+                $display("@%h: *%h <= %h", pc, {18'b0, mem_addr_byte}, mem_data);
                 data_mem[mem_addr] <= mem_data;
             end
         end

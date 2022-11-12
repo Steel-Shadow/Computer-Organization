@@ -36,7 +36,7 @@ module test_bench;
 
     initial begin
         // Initialize Inputs
-        clk   = 0;
+        clk   = 1;
         reset = 1;
         #3 reset = 0;
 
@@ -46,4 +46,3 @@ module test_bench;
 
 
 endmodule
-
