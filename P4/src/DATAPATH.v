@@ -1,19 +1,56 @@
 module DATAPATH (
     input clk,
-    input reset
+    input reset,
+
+    input [25:21] rs,
+    input [20:16] rt,
+    input [15:11] rd,
+    input [ 10:6] shamt,
+    input [ 15:0] imm,
+    input [ 25:0] j_address,
+
+    input [2:0] next_pc_op,
+
+    input       reg_write,
+    input       a1_op,
+    input [1:0] reg_addr_op,
+    input [2:0] reg_data_op,
+
+    input [2:0] alu_op,
+    input [2:0] alu_b_op,
+
+    input         mem_write,
+    
+    output [31:0] instr
 );
     //PC 
     wire [31:0] pc;
+    wire [31:0] read1;
+    wire [31:0] alu_out;
+    wire [ 4:0] reg_addr;
+    wire [31:0] reg_data;
+    wire [31:0] read2;
+    wire [31:0] dm_out;
+    wire [31:0] alu_b;
 
     PC u_PC (
         .clk  (clk),
         .reset(reset),
 
+        .next_pc_op(next_pc_op),
+        .in0       (pc + 32'b1),                                                            //pc+4 
+        .in1       (alu_out == 32'b0 ? pc + 4 + {{14{imm[15]}}, imm, 2'b00} : pc + 32'd4),  //beq alu_out==0 pc<-pc+4+sign_ext_offset||00
+        .in2       ({pc[31:28], j_address, 2'b00}),                                         //jal PC31..28 || instr_index || 0^2
+        .in3       (read1),                                                                 //jr PC <- GPR[rs]
+        .in4       (),
+        .in5       (),
+        .in6       (),
+        .in7       (),
+
         .pc_out(pc)
     );
 
     //IM 
-    wire [31:0] instr;
 
     IM u_IM (
         .pc(pc),
@@ -21,43 +58,7 @@ module DATAPATH (
         .instr(instr)
     );
 
-    // CU 
-    wire [25:21] rs;
-    wire [20:16] rt;
-    wire [15:11] rd;
-    wire [ 10:6] shamt;
-    wire [  5:0] func;
-    wire [ 15:0] imm;
-    wire [ 25:0] j_address;
-    wire         reg_write;
-    wire         a1_op;
-    wire [  1:0] reg_addr_op;
-    wire [  2:0] reg_data_op;
-    wire [  2:0] alu_op;
-    wire [  2:0] alu_b_op;
-    wire         mem_write;
-
-    CU u_CU (
-        .instr(instr),
-
-        .rs         (rs),
-        .rt         (rt),
-        .rd         (rd),
-        .shamt      (shamt),
-        .func       (func),
-        .imm        (imm),
-        .j_address  (j_address),
-        .reg_write  (reg_write),
-        .a1_op      (a1_op),
-        .reg_addr_op(reg_addr_op),
-        .reg_data_op(reg_data_op),
-        .alu_op     (alu_op),
-        .alu_b_op   (alu_b_op),
-        .mem_write  (mem_write)
-    );
-
     // MUX_4 GRF的reg_addr选择
-    wire [4:0] reg_addr;
 
     MUX_4 #(
         .DATA_WIDTH(5)
@@ -66,28 +67,31 @@ module DATAPATH (
         .data0(rd),
         .data1(rt),
         .data2(5'd31),
+        .data3(),
 
         .ans(reg_addr)
     );
 
     // MUX_8 GRF的reg_data选择        
-    wire [31:0] reg_data;
+
 
     MUX_8 #(
         .DATA_WIDTH(32)
     ) u_MUX_8_GRF_reg_data (
         .sel  (reg_data_op),
-        .data0(ALU_out),
-        .data1(DM_out),
-        .data2({imm, {16{0}}}),
-        .data3(pc + 4),
+        .data0(alu_out),
+        .data1(dm_out),
+        .data2({imm, {16{1'b0}}}),
+        .data3(pc + 32'd4),
+        .data4(),
+        .data5(),
+        .data6(),
+        .data7(),
 
         .ans(reg_data)
     );
 
     // GRF Outputs      
-    wire [31:0] read1;
-    wire [31:0] read2;
 
     GRF u_GRF (
         .reset    (reset),
@@ -103,18 +107,46 @@ module DATAPATH (
         .read2(read2)
     );
 
-    // ALU Inputs      
-    reg  [31:0] a;
-    reg  [31:0] b;
+    // MUX_8 alu_b选择
 
-    // ALU Outputs
-    wire [31:0] alu_out;
+
+    MUX_8 #(
+        .DATA_WIDTH(32)
+    ) u_MUX_8_ALU_alu_b (
+        .sel  (alu_b_op),
+        .data0(read2),
+        .data1({{16{imm[15]}}, imm}),
+        .data2({{16{1'b0}}, imm}),
+        .data3({{27{1'b0}}, shamt}),
+        .data4(),
+        .data5(),
+        .data6(),
+        .data7(),
+
+        .ans(alu_b)
+    );
+
+    // ALU
 
     ALU u_ALU (
-        .a     (a),
-        .b     (b),
+        .a     (read1),
+        .b     (alu_b),
         .alu_op(alu_op),
 
         .alu_out(alu_out)
     );
+
+
+    // DM
+    DM u_DM (
+        .clk          (clk),
+        .reset        (reset),
+        .pc           (pc),
+        .mem_write    (mem_write),
+        .mem_addr_byte(alu_out[13:0]),
+        .mem_data     (read2),
+
+        .dm_out(dm_out)
+    );
+
 endmodule

@@ -4,8 +4,12 @@ module IM (
 );
     // IM ÈÝÁ¿Îª 16KiB£¨4096 ¡Á 32bit£©
     // °´×ÖÑ°Ö·
-    reg [31:0] inst_mem[11:0];
+    initial begin
+        $readmemh("test_add.txt");
+    end
 
-    assign instr = inst_mem[pc];
+    reg [31:0] inst_mem[4095:0];
+
+    assign instr = inst_mem[pc[13:2]];
 
 endmodule

@@ -25,10 +25,10 @@ module CU (
     output [20:16] rt,
     output [15:11] rd,
     output [ 10:6] shamt,
-    output [  5:0] func,
     output [ 15:0] imm,
     output [ 25:0] j_address,
 
+    output reg [2:0] next_pc_op,  //PC部分
 
     output reg       reg_write,    // GRF部分
     output reg       a1_op,        // sll时为1
@@ -40,6 +40,8 @@ module CU (
 
     output reg mem_write  //DM部分
 );
+    wire [5:0] func;
+    wire [5:0] op;
     /*********************splitter*******************/
     assign op        = instr[31:26];
 
@@ -100,9 +102,18 @@ module CU (
             default:   ;
         endcase
 
-        /*  reg_write a1_op reg_addr_op reg_data_op
+        /* next_pc_op
+        reg_write a1_op reg_addr_op reg_data_op
         alu_op alu_b_op
         mem_write                                  */
+
+        //PC部分
+        if (beq) next_pc_op = 3'd1;
+        else if (jal) next_pc_op = 3'd2;
+        else if (jr) next_pc_op = 3'd3;
+        else next_pc_op = 3'd0;
+
+
         reg_write = (add | sub | ori | lw | lui | jal | sll);
         a1_op     = sll;
 
@@ -113,23 +124,23 @@ module CU (
         else reg_addr_op = 2'd3;  //error
 
         //3位
-        if (lw) reg_data_op = 3'd1;  //DM_out
+        if (lw) reg_data_op = 3'd1;  //dm_out
         else if (lui) reg_data_op = 3'd2;  //imm<<16
         else if (jal) reg_data_op = 3'd3;  //pc+4
-        else reg_data_op = 3'd0;  //ALU_out
+        else reg_data_op = 3'd0;  //alu_out
 
         // + - | compare(>1 ==0 <-1) 有符号比较
         if (add | lw) alu_op = 3'd0;
         else if (sub) alu_op = 3'd1;
         else if (ori) alu_op = 3'd2;
         else if (beq) alu_op = 3'd3;
-        else alu_op = 3'd7;
+        else alu_op = 3'd0;
 
         //3位
         if (lw | sw) alu_b_op = 3'd1;  //sign_ext imm
         else if (ori) alu_b_op = 3'd2;  //zero_ext imm
         else if (sll) alu_b_op = 3'd3;  //zero_ext shamt
-        else alu_b_op = 3'd0;  //GRF_RD2
+        else alu_b_op = 3'd0;  //GRF_RD2 read2
 
         if (sw) mem_write = 1'b1;
         else mem_write = 1'b0;
