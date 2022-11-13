@@ -10,7 +10,7 @@
          </top_modules>
       </db_ref>
    </db_ref_list>
-   <WVObjectSize size="10" />
+   <WVObjectSize size="9" />
    <wvobject fp_name="/test_bench/clk" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -19,23 +19,71 @@
       <obj_property name="ElementShortName">reset</obj_property>
       <obj_property name="ObjectShortName">reset</obj_property>
    </wvobject>
-   <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_PC/pc" type="array" db_ref_id="1">
+   <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_IM/pc" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">pc[31:0]</obj_property>
       <obj_property name="ObjectShortName">pc[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_IM/instr" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">instr[31:0]</obj_property>
+      <obj_property name="ObjectShortName">instr[31:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="group184" type="group">
       <obj_property name="label">GRF</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_GRF/a1" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">a1[4:0]</obj_property>
-         <obj_property name="ObjectShortName">a1[4:0]</obj_property>
-         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      <wvobject fp_name="group195" type="group">
+         <obj_property name="label">MUX_reg_addr</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_MUX_4_GRF_reg_addr/sel" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">sel[1:0]</obj_property>
+            <obj_property name="ObjectShortName">sel[1:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_MUX_4_GRF_reg_addr/data0" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">data0[4:0]</obj_property>
+            <obj_property name="ObjectShortName">data0[4:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_MUX_4_GRF_reg_addr/data1" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">data1[4:0]</obj_property>
+            <obj_property name="ObjectShortName">data1[4:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_MUX_4_GRF_reg_addr/data2" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">data2[4:0]</obj_property>
+            <obj_property name="ObjectShortName">data2[4:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_MUX_4_GRF_reg_addr/ans" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">ans[4:0]</obj_property>
+            <obj_property name="ObjectShortName">ans[4:0]</obj_property>
+            <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         </wvobject>
       </wvobject>
-      <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_GRF/a2" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">a2[4:0]</obj_property>
-         <obj_property name="ObjectShortName">a2[4:0]</obj_property>
-         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      <wvobject fp_name="group195" type="group">
+         <obj_property name="label">MUX_reg_data</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_MUX_8_GRF_reg_data/sel" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">sel[2:0]</obj_property>
+            <obj_property name="ObjectShortName">sel[2:0]</obj_property>
+            <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_MUX_8_GRF_reg_data/data0" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">data0[31:0]</obj_property>
+            <obj_property name="ObjectShortName">data0[31:0]</obj_property>
+            <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_MUX_8_GRF_reg_data/data1" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">data1[31:0]</obj_property>
+            <obj_property name="ObjectShortName">data1[31:0]</obj_property>
+            <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+         </wvobject>
+         <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_MUX_8_GRF_reg_data/ans" type="array" db_ref_id="1">
+            <obj_property name="ElementShortName">ans[31:0]</obj_property>
+            <obj_property name="ObjectShortName">ans[31:0]</obj_property>
+            <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+         </wvobject>
       </wvobject>
       <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_GRF/reg_addr" type="array" db_ref_id="1">
          <obj_property name="ElementShortName">reg_addr[4:0]</obj_property>
@@ -45,6 +93,16 @@
       <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_GRF/reg_data" type="array" db_ref_id="1">
          <obj_property name="ElementShortName">reg_data[31:0]</obj_property>
          <obj_property name="ObjectShortName">reg_data[31:0]</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_GRF/a1" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">a1[4:0]</obj_property>
+         <obj_property name="ObjectShortName">a1[4:0]</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_GRF/a2" type="array" db_ref_id="1">
+         <obj_property name="ElementShortName">a2[4:0]</obj_property>
+         <obj_property name="ObjectShortName">a2[4:0]</obj_property>
          <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
       </wvobject>
       <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_GRF/read1" type="array" db_ref_id="1">
@@ -86,59 +144,6 @@
          <obj_property name="label">GRF</obj_property>
       </wvobject>
    </wvobject>
-   <wvobject fp_name="group195" type="group">
-      <obj_property name="label">MUX_reg_addr</obj_property>
-      <obj_property name="DisplayName">label</obj_property>
-      <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_MUX_4_GRF_reg_addr/sel" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">sel[1:0]</obj_property>
-         <obj_property name="ObjectShortName">sel[1:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_MUX_4_GRF_reg_addr/data0" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">data0[4:0]</obj_property>
-         <obj_property name="ObjectShortName">data0[4:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_MUX_4_GRF_reg_addr/data1" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">data1[4:0]</obj_property>
-         <obj_property name="ObjectShortName">data1[4:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_MUX_4_GRF_reg_addr/data2" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">data2[4:0]</obj_property>
-         <obj_property name="ObjectShortName">data2[4:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_MUX_4_GRF_reg_addr/ans" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">ans[4:0]</obj_property>
-         <obj_property name="ObjectShortName">ans[4:0]</obj_property>
-         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      </wvobject>
-   </wvobject>
-   <wvobject fp_name="group195" type="group">
-      <obj_property name="label">MUX_reg_data</obj_property>
-      <obj_property name="DisplayName">label</obj_property>
-      <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_MUX_8_GRF_reg_data/sel" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">sel[2:0]</obj_property>
-         <obj_property name="ObjectShortName">sel[2:0]</obj_property>
-         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_MUX_8_GRF_reg_data/data0" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">data0[31:0]</obj_property>
-         <obj_property name="ObjectShortName">data0[31:0]</obj_property>
-         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_MUX_8_GRF_reg_data/data1" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">data1[31:0]</obj_property>
-         <obj_property name="ObjectShortName">data1[31:0]</obj_property>
-         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-      </wvobject>
-      <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_MUX_8_GRF_reg_data/ans" type="array" db_ref_id="1">
-         <obj_property name="ElementShortName">ans[31:0]</obj_property>
-         <obj_property name="ObjectShortName">ans[31:0]</obj_property>
-         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-      </wvobject>
-   </wvobject>
    <wvobject fp_name="/test_bench/uut/u_CU/rs" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">rs[25:21]</obj_property>
       <obj_property name="ObjectShortName">rs[25:21]</obj_property>
@@ -170,7 +175,7 @@
       <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_ALU/alu_op" type="array" db_ref_id="1">
          <obj_property name="ElementShortName">alu_op[2:0]</obj_property>
          <obj_property name="ObjectShortName">alu_op[2:0]</obj_property>
-         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
       </wvobject>
       <wvobject fp_name="/test_bench/uut/u_DATAPATH/u_ALU/alu_out" type="array" db_ref_id="1">
          <obj_property name="ElementShortName">alu_out[31:0]</obj_property>

@@ -23,7 +23,6 @@ module DATAPATH (
 
     output [31:0] instr
 );
-    //PC 
     wire [31:0] pc;
     wire [31:0] read1;
     wire [31:0] alu_out;
@@ -32,7 +31,8 @@ module DATAPATH (
     wire [31:0] read2;
     wire [31:0] dm_out;
     wire [31:0] alu_b;
-
+    
+    //PC 
     PC u_PC (
         .clk  (clk),
         .reset(reset),
@@ -51,7 +51,6 @@ module DATAPATH (
     );
 
     //IM 
-
     IM u_IM (
         .pc(pc),
 
@@ -88,8 +87,7 @@ module DATAPATH (
         .ans(reg_data)
     );
 
-    // GRF Outputs      
-
+    // GRF 
     GRF u_GRF (
         .reset    (reset),
         .clk      (clk),
@@ -105,8 +103,6 @@ module DATAPATH (
     );
 
     // MUX_8 alu_b—°‘Ò
-
-
     MUX_8 #(
         .DATA_WIDTH(32)
     ) u_MUX_8_ALU_alu_b (
@@ -124,7 +120,6 @@ module DATAPATH (
     );
 
     // ALU
-
     ALU u_ALU (
         .a     (read1),
         .b     (alu_b),

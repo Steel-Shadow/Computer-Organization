@@ -1,5 +1,4 @@
 # cpu 设计文档
-# 请删除反汇编 DASM !!!
 
 ## 设计说明
 处理器为 32 位单周期处理器，不考虑延迟槽，应支持的指令集为：
@@ -23,38 +22,131 @@ $display("@%h: $%d <= %h", WPC, Waddr, WData);
 $display("@%h: *%h <= %h", pc, addr, din);
 ```
 
-## DataPath 设计通路
+## DATAPATH 数据通路
 
-### pc PC 程序计数器
+### PC 程序计数器
+clk reset next_pc_op in0-7      
+pc_out
+
+| next_pc_op |   0   |   1    |     2     |   3   |   4   |
+| :--------: | :---: | :----: | :-------: | :---: | :---: |
+|   instr    | else  |  beq   |    jal    |  jr   |       |
+|  next_pc   | pc+4  | pc+4+? | j_address | read1 |       |
+
 与 logisim 版本不同，NPC 模块被合并到 pc 中     
-复位后，PC 指向 0x00003000，此处为第一条指令的地址，与 MARS 的 Memory Configuration 相匹配       
+复位后，PC 指向 0x00003000，此处为第一条指令的地址，与 MARS 的 Memory Configuration 相匹配     
 
-input clk reset
-output pc_out
+### IM 指令存储器
+pc
+instr
 
-### im IM 指令存储器
 IM 容量为 16KiB（4096 × 32bit）
 
-input pc
-output instr
+实际 inst_mem 只有1024字
+pc_index = pc - 32'h3000;
 
-### alu ALU 算术单元
-add, sub, ori, lw, sw, beq, lui, jal, jr, nop 
+code.txt 应当放在工作主目录下！！！
+```verilog
+initial begin
+    $readmemh("code.txt", inst_mem);
+end
+```
 
-\+ - | compare(>1 ==0 <-1) 有符号比较
-alu_op 为 3 位      
+### GRF 寄存器堆
+reset clk pc reg_write a1 a2(rt) reg_addr reg_data  
+read1 read2
 
-input a b alu_op
-output alu_out
+| a1_op |   0   |   1   |
+| :---: | :---: | :---: |
+| instr | else  |  sll  |
+|  a1   |  rs   |  rt   |
 
+| reg_addr_op |      0      |     1      |   2    |   3   |
+| :---------: | :---------: | :--------: | :----: | :---: |
+|    instr    | add sub sll | lw lui ori |  jal   | else  |
+|  reg_addr   |     rd      |     rt     | 31 $ra |       |
 
-### dm DM 数据存储器
+| reg_data_op |    0    |   1    |    2     |   3   |
+| :---------: | :-----: | :----: | :------: | :---: |
+|    instr    |  else   |   lw   |   lui    |  jal  |
+|  reg_data   | alu_out | dm_out | imm_0^16 | pc+4  |
+
+### ALU 算术单元
+a b alu_op
+alu_out
+
+add, sub, ori, lw, sw, beq, lui, jal, jr, nop
+
+| alu_op  |   0   |   1   |   2   |     3      |
+| :-----: | :---: | :---: | :---: | :--------: |
+|  instr  | else  |  sub  |  ori  |    beq     |
+| alu_out |   +   |   -   |  or   | >1 ==0 <-1 |
+alu_op 为 3 位   
+compare(>1 ==0 <-1) 有符号比较
+
+| alu_b_op |   0   |      1       |      2       |       3        |
+| :------: | :---: | :----------: | :----------: | :------------: |
+|  instr   | else  |    lw sw     |     ori      |      sll       |
+|  alu_b   | read2 | sign_ext imm | zero_ext imm | zero_ext shamt |
+
+### DM 数据存储器
+clk reset pc mem_write mem_addr_byte mem_data  
+dm_out
+
 DM 容量为 12KiB（3072 × 32bit）
+实际容量为4096字
+
+未检查 DM 写入地址是否与 IM 冲突
 
 ## controller CU 控制器 
-input instruct
-0
-add, sub, ori, lw, sw, beq, lui, jal, jr, nop    
+instruct    
+
+rs rt rd shamt imm j_address    
+next_pc_op       
+reg_write a1_op reg_addr_op reg_data_op    
+alu_op alu_b_op  
+mem_write
+
+支持指令 add, sub, ori, lw, sw, beq, lui, jal, jr, nop 
+添加指令 sll
+
+PC
+-----------------------------------------------------------------------------
+| next_pc_op |   0   |   1    |     2     |   3   |   4   |
+| :--------: | :---: | :----: | :-------: | :---: | :---: |
+|   instr    | else  |  beq   |    jal    |  jr   |       |
+|  next_pc   | pc+4  | pc+4+? | j_address | read1 |       |
+
+GRF
+-----------------------------------------------------------------------------
+| a1_op |   0   |   1   |
+| :---: | :---: | :---: |
+| instr | else  |  sll  |
+|  a1   |  rs   |  rt   |
+
+| reg_addr_op |      0      |     1      |   2    |   3   |
+| :---------: | :---------: | :--------: | :----: | :---: |
+|    instr    | add sub sll | lw lui ori |  jal   | else  |
+|  reg_addr   |     rd      |     rt     | 31 $ra |       |
+
+| reg_data_op |    0    |   1    |    2     |   3   |
+| :---------: | :-----: | :----: | :------: | :---: |
+|    instr    |  else   |   lw   |   lui    |  jal  |
+|  reg_data   | alu_out | dm_out | imm_0^16 | pc+4  |
+
+ALU
+-------------------------------------------------------------------------------
+| alu_op  |   0   |   1   |   2   |     3      |
+| :-----: | :---: | :---: | :---: | :--------: |
+|  instr  | else  |  sub  |  ori  |    beq     |
+| alu_out |   +   |   -   |  or   | >1 ==0 <-1 |
+alu_op 为 3 位   
+compare(>1 ==0 <-1) 有符号比较
+
+| alu_b_op |   0   |      1       |      2       |       3        |
+| :------: | :---: | :----------: | :----------: | :------------: |
+|  instr   | else  |    lw sw     |     ori      |      sll       |
+|  alu_b   | read2 | sign_ext imm | zero_ext imm | zero_ext shamt |
 
 
 # 思考题

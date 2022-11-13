@@ -134,6 +134,7 @@ module CU (
         else if (sub) alu_op = 3'd1;
         else if (ori) alu_op = 3'd2;
         else if (beq) alu_op = 3'd3;
+        else if (sll) alu_op = 3'd4;
         else alu_op = 3'd0;
 
         //3λ

@@ -15,6 +15,7 @@ module ALU (
             1: ans = a - b;
             2: ans = a | b;
             3: ans = ($signed(a) > $signed(b) ? 1 : a == b ? 0 : -1);
+            4: ans = a << b;
             default: ans = 0;
         endcase
     end
