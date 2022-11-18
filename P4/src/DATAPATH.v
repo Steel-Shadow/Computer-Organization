@@ -31,7 +31,7 @@ module DATAPATH (
     wire [31:0] read2;
     wire [31:0] dm_out;
     wire [31:0] alu_b;
-    
+
     //PC 
     PC u_PC (
         .clk  (clk),
@@ -79,8 +79,8 @@ module DATAPATH (
         .data1(dm_out),
         .data2({imm, {16{1'b0}}}),
         .data3(pc + 32'd4),
-        .data4(),
-        .data5(),
+        .data4({{16{alu_out[1] ? dm_out[31] : dm_out[15]}}, alu_out[1] ? dm_out[31:16] : dm_out[15:0]}),
+        .data5(read1 < read2 ? 1 : 0),
         .data6(),
         .data7(),
 

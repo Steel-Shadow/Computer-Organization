@@ -28,11 +28,6 @@ $display("@%h: *%h <= %h", pc, addr, din);
 clk reset next_pc_op in0-7      
 pc_out
 
-| next_pc_op |   0   |   1    |     2     |   3   |   4   |
-| :--------: | :---: | :----: | :-------: | :---: | :---: |
-|   instr    | else  |  beq   |    jal    |  jr   |       |
-|  next_pc   | pc+4  | pc+4+? | j_address | read1 |       |
-
 与 logisim 版本不同，NPC 模块被合并到 pc 中     
 复位后，PC 指向 0x00003000，此处为第一条指令的地址，与 MARS 的 Memory Configuration 相匹配     
 
@@ -56,38 +51,11 @@ end
 reset clk pc reg_write a1 a2(rt) reg_addr reg_data  
 read1 read2
 
-| a1_op |   0   |   1   |
-| :---: | :---: | :---: |
-| instr | else  |  sll  |
-|  a1   |  rs   |  rt   |
-
-| reg_addr_op |      0      |     1      |   2    |   3   |
-| :---------: | :---------: | :--------: | :----: | :---: |
-|    instr    | add sub sll | lw lui ori |  jal   | else  |
-|  reg_addr   |     rd      |     rt     | 31 $ra |       |
-
-| reg_data_op |    0    |   1    |    2     |   3   |
-| :---------: | :-----: | :----: | :------: | :---: |
-|    instr    |  else   |   lw   |   lui    |  jal  |
-|  reg_data   | alu_out | dm_out | imm_0^16 | pc+4  |
-
 ### ALU 算术单元
 a b alu_op
 alu_out
 
 add, sub, ori, lw, sw, beq, lui, jal, jr, nop
-
-| alu_op  |   0   |   1   |   2   |     3      |
-| :-----: | :---: | :---: | :---: | :--------: |
-|  instr  | else  |  sub  |  ori  |    beq     |
-| alu_out |   +   |   -   |  or   | >1 ==0 <-1 |
-alu_op 为 3 位   
-compare(>1 ==0 <-1) 有符号比较
-
-| alu_b_op |   0   |      1       |      2       |       3        |
-| :------: | :---: | :----------: | :----------: | :------------: |
-|  instr   | else  |    lw sw     |     ori      |      sll       |
-|  alu_b   | read2 | sign_ext imm | zero_ext imm | zero_ext shamt |
 
 ### DM 数据存储器
 clk reset pc mem_write mem_addr_byte mem_data  
@@ -108,7 +76,8 @@ alu_op alu_b_op
 mem_write
 
 支持指令 add, sub, ori, lw, sw, beq, lui, jal, jr, nop 
-添加指令 sll
+添加指令 sll    
+lh slt srav 未在下表中列出信号      
 
 PC
 -----------------------------------------------------------------------------
@@ -136,10 +105,10 @@ GRF
 
 ALU
 -------------------------------------------------------------------------------
-| alu_op  |   0   |   1   |   2   |     3      |
-| :-----: | :---: | :---: | :---: | :--------: |
-|  instr  | else  |  sub  |  ori  |    beq     |
-| alu_out |   +   |   -   |  or   | >1 ==0 <-1 |
+| alu_op  |   0   |   1   |   2   |     3      |   4   |
+| :-----: | :---: | :---: | :---: | :--------: | :---: |
+|  instr  | else  |  sub  |  ori  |    beq     |  sll  |
+| alu_out |   +   |   -   |  or   | >1 ==0 <-1 | a<<B  |
 alu_op 为 3 位   
 compare(>1 ==0 <-1) 有符号比较
 
@@ -148,6 +117,11 @@ compare(>1 ==0 <-1) 有符号比较
 |  instr   | else  |    lw sw     |     ori      |      sll       |
 |  alu_b   | read2 | sign_ext imm | zero_ext imm | zero_ext shamt |
 
+# 测试方案
+运行 test\construct.exe (讨论区) 输出 random_code.asm 再复制到test_code.asm 
+或者自行编写 test_code.asm      
+运行 easy_mars.bat，得到 Hex 机械码 code.txt (讨论区)，正确输出 mars_out.txt     
+手动打开 ISE 仿真输出 cpu_out.txt，比较结果
 
 # 思考题
 1.  阅读下面给出的 DM 的输入示例中（示例 DM 容量为 4KB，即 32bit × 1024字），根据你的理解回答，这个 addr 信号又是从哪里来的？地址信号 addr 位数为什么是 [11:2] 而不是 [9:0] ？

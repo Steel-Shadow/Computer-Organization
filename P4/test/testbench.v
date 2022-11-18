@@ -38,8 +38,7 @@ module test_bench;
         // Initialize Inputs
         clk   = 1;
         reset = 1;
-        #3 reset = 0;
-
+        #5 reset = 0;
     end
 
     always #5 clk = ~clk;
