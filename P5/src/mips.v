@@ -25,12 +25,16 @@ module mips (
     wire [ 15:0] imm_D;
     wire [ 25:0] j_address_D;
 
-    wire [  2:0] a1_op_D;  //GRF¶ÁÈ¡
+    wire         a1_op_D;  //GRF¶ÁÈ¡
     wire [ 31:0] read1_D;
     wire [ 31:0] read2_D;
 
     wire [  2:0] ext_op_D;  //EXT
     wire [ 31:0] ext_D;
+
+    wire [  1:0] Tuse_rs;
+    wire [  1:0] Tuse_rt;
+    wire [  1:0] Tnew;
 
     //////////////////////////////////////////// E
     wire [ 31:0] pc_E;
@@ -51,6 +55,8 @@ module mips (
     wire [  2:0] alu_op_E;
     wire [ 31:0] alu_out_E;
 
+    wire [  1:0] Tnew_E;
+
     //////////////////////////////////////////// M
     wire [ 31:0] pc_M;
     wire [ 31:0] instr_M;
@@ -70,6 +76,8 @@ module mips (
 
     wire         mem_write_M;  //DM
     wire [ 31:0] dm_out_M;
+
+    wire [  1:0] Tnew_M;
 
     //////////////////////////////////////////// W
     wire [ 31:0] pc_W;
@@ -118,6 +126,9 @@ module mips (
 
     /************   stage_D    ************/
     D_reg u_D_reg (
+        .clk  (clk),
+        .reset(reset),
+
         .in_pc   (pc_F),
         .in_instr(instr_F),
 
@@ -139,13 +150,17 @@ module mips (
 
         .ext_op(ext_op_D),
 
-        .a1_op(a1_op_D)
+        .a1_op(a1_op_D),
+
+        .Tuse_rs(Tuse_rs),
+        .Tuse_rt(Tuse_rt),
+        .Tnew   (Tnew)
     );
 
     GRF u_GRF (
         .reset(reset),
         .clk  (clk),
-        .pc   (pc_D),
+        .pc   (pc_W),
 
         //stage_D¶ÁÈ¡
         .a1   (a1_op_D ? rt_D : rs_D),
@@ -169,17 +184,22 @@ module mips (
 
     /************   stage_E    ************/
     E_reg u_E_reg (
+        .clk  (clk),
+        .reset(reset),
+
         .in_pc   (pc_D),
         .in_instr(instr_D),
         .in_read1(read1_D),
         .in_read2(read2_D),
         .in_ext  (ext_D),
+        .in_Tnew (Tnew),
 
         .out_pc   (pc_E),
         .out_instr(instr_E),
         .out_read1(read1_E),
         .out_read2(read2_E),
-        .out_ext  (ext_E)
+        .out_ext  (ext_E),
+        .out_Tnew (Tnew_E)
     );
 
     CU_E u_CU_E (
@@ -206,19 +226,24 @@ module mips (
 
     /************   stage_M    ************/
     M_reg u_M_reg (
+        .clk  (clk),
+        .reset(reset),
+
         .in_pc     (pc_E),
         .in_instr  (instr_E),
         .in_read1  (read1_E),
         .in_read2  (read2_E),
         .in_ext    (ext_E),
         .in_alu_out(alu_out_E),
+        .in_Tnew   (Tnew_E - 2'b1 > 0 ? Tnew_E : 0),
 
         .out_pc     (pc_M),
         .out_instr  (instr_M),
         .out_read1  (read1_M),
         .out_read2  (read2_M),
         .out_ext    (ext_M),
-        .out_alu_out(alu_out_M)
+        .out_alu_out(alu_out_M),
+        .out_Tnew   (Tnew_M),
     );
 
     CU_M u_CU_M (
@@ -238,7 +263,7 @@ module mips (
         .reset        (reset),
         .pc           (pc_M),
         .mem_write    (mem_write_M),
-        .mem_addr_byte(alu_out_M),
+        .mem_addr_byte(alu_out_M[13:0]),
         .mem_data     (read2_M),
 
         .dm_out(dm_out_M)
@@ -247,6 +272,9 @@ module mips (
     /************   stage_W    ************/
 
     w_reg u_w_reg (
+        .clk  (clk),
+        .reset(reset),
+
         .in_pc     (pc_M),
         .in_instr  (instr_M),
         .in_read1  (read1_M),
@@ -295,9 +323,8 @@ module mips (
         .sel  (reg_data_op_W),
         .data0(alu_out_W),
         .data1(dm_out_W),
-        .data2({imm_W, {16{1'b0}}}),
-        .data3(pc_W + 32'd8),
-        .data4(),
+        .data2(pc_W + 32'd8),
+        .data3(),
         .ans  (reg_data_W)
     );
 endmodule

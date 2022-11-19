@@ -11,12 +11,12 @@ module CU_E (
     output reg       alu_b_op,  //alu²¿·Ö
     output reg [2:0] alu_op
 );
-    assign op        = instr[31:26];
-    assign rs        = instr[25:21];
-    assign rt        = instr[20:16];
-    assign rd        = instr[15:11];
-    assign shamt     = instr[10:6];
-    assign func      = instr[5:0];
+    wire [5:0] op = instr[31:26];
+    assign rs    = instr[25:21];
+    assign rt    = instr[20:16];
+    assign rd    = instr[15:11];
+    assign shamt = instr[10:6];
+    wire [5:0] func = instr[5:0];
     assign imm       = instr[15:0];
     assign j_address = instr[25:0];
 
@@ -42,6 +42,7 @@ module CU_E (
         else if (sub) alu_op = 3'd1;
         else if (ori) alu_op = 3'd2;
         else if (sll) alu_op = 3'd3;
+        else if (lui) alu_op = 3'd4;  //lui b<<16
         else alu_op = 3'd0;
     end
 endmodule

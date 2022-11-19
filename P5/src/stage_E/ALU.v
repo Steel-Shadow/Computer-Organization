@@ -11,11 +11,12 @@ module ALU (
 
     always @(*) begin
         case (alu_op)
-            0: ans = a + b;
-            1: ans = a - b;
-            2: ans = a | b;
-            3: ans = a << b;
-            4: ans = ($signed(a) > $signed(b) ? 1 : a == b ? 0 : -1);
+            3'd0: ans = a + b;
+            3'd1: ans = a - b;
+            3'd2: ans = a | b;
+            3'd3: ans = a << b;
+            3'd4: ans = b << 5'd16;
+            // 4: ans = ($signed(a) > $signed(b) ? 1 : a == b ? 0 : -1);
             default: ans = 0;
         endcase
     end

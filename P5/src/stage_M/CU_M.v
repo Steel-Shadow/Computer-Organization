@@ -10,12 +10,12 @@ module CU_M (
 
     output reg mem_write
 );
-    assign op        = instr[31:26];
+    wire [5:0] op = instr[31:26];
     assign rs        = instr[25:21];
     assign rt        = instr[20:16];
     assign rd        = instr[15:11];
     assign shamt     = instr[10:6];
-    assign func      = instr[5:0];
+    wire [5:0] func = instr[5:0];
     assign imm       = instr[15:0];
     assign j_address = instr[25:0];
 

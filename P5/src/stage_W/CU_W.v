@@ -9,15 +9,15 @@ module CU_W (
     output [ 25:0] j_address,
 
     output reg       reg_write,
-    output reg [2:0] reg_addr_op,
+    output reg [1:0] reg_addr_op,
     output reg [2:0] reg_data_op
 );
-    assign op        = instr[31:26];
+    wire [5:0] op = instr[31:26];
     assign rs        = instr[25:21];
     assign rt        = instr[20:16];
     assign rd        = instr[15:11];
     assign shamt     = instr[10:6];
-    assign func      = instr[5:0];
+    wire [5:0] func = instr[5:0];
     assign imm       = instr[15:0];
     assign j_address = instr[25:0];
 
@@ -46,8 +46,7 @@ module CU_W (
 
         //reg_data_op
         if (lw) reg_data_op = 3'd1;  //dm_out
-        else if (lui) reg_data_op = 3'd2;  //ext<<16
-        else if (jal) reg_data_op = 3'd3;  //pc_W+8
+        else if (jal) reg_data_op = 3'd2;  //pc_W+8
         else reg_data_op = 3'd0;  //alu_out
     end
 endmodule
