@@ -9,7 +9,9 @@ module CU_E (
     output [ 25:0] j_address,
 
     output reg       alu_b_op,  //alu≤ø∑÷
-    output reg [2:0] alu_op
+    output reg [2:0] alu_op,
+
+    output reg [4:0] reg_addr  //≈–∂œ√∞œ’
 );
     wire [5:0] op = instr[31:26];
     assign rs    = instr[25:21];
@@ -44,5 +46,11 @@ module CU_E (
         else if (sll) alu_op = 3'd3;
         else if (lui) alu_op = 3'd4;  //lui b<<16
         else alu_op = 3'd0;
+
+        //reg_addr ≈–∂œ√∞œ’
+        if (add | sub | sll) reg_addr = rd;  //rd
+        else if (lw | lui | ori) reg_addr = rt;  //rt
+        else if (jal) reg_addr = 5'd31;  //$ra $31
+        else reg_addr = 5'd0;  //$0
     end
 endmodule

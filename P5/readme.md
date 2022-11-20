@@ -6,16 +6,29 @@ add, sub, ori, lw, sw, beq, lui, jal, jr, nop
 1. 流水线寄存器+单指令功能  
 2. 阻塞实现   
 
-    | instr_D | reg   | Tuse |
-    | ------- | ----- | ---- |
-    | beq     | rs/rt | 0    |
-    | cal_r   | rs/rt | 1    |
-    | cal_i   | rs    | 1    |
-    | load    | rs    | 1    |
-    | store   | rs    | 1    |
-    | store   | rt    | 2    |
+    |    instr_D     |  reg  | Tuse  |
+    | :------------: | :---: | :---: |
+    |      beq       | rs/rt |   0   |
+    | cal_r - sll_rs | rs/rt |   1   |
+    |     cal_i      |  rs   |   1   |
+    |      load      |  rs   |   1   |
+    |     store      |  rs   |   1   |
+    |     store      |  rt   |   2   |
+    没注明的Tuse为3如sll的Tuse_rs
 
+    | instr_D | Tnew  |
+    | :-----: | :---: |
+    |   beq   |   0   |
+    |  cal_r  |   1   |
+    |  cal_i  |   1   |
+    |  load   |   1   |
+    |  store  |   1   |
+    |  store  |   2   |
     只需考虑 Tnew_E 此后递归运算
+
+    ![图 1](images/Stall_Forwad.png)  
+
+    冒险控制模块合并于CU_D中
 
     为了方便处理，课程组要求阻塞是指将指令阻塞在 D 级。
     当一个指令到达 D 级后，我们需要将它的 Tuse值与后面每一级的 Tnew进行比较（当然还有 AA 值的校验），
@@ -27,9 +40,9 @@ add, sub, ori, lw, sw, beq, lui, jal, jr, nop
     将 E 级流水线寄存器清零（这等价于插入了一个 nop 指令）。
     此外，还有一个考虑，就是复位信号和阻塞信号的优先级问题。请仔细设计信号的优先级来保证流水线的正确性。
 
-1. GRF内部转发实现
-2. 转发实现  
-3. 测试优化
+3. GRF内部转发实现
+4. 转发实现  
+5. 测试优化
 
 在设计时，可以利用这一点，按照流水级的顺序对每一级的流水寄存器进行实例化，然后在其间插入相应级的模块，并用注释清晰地注明各级起始位置。
 另外，也可以考虑增加模块层次，将每一流水级的各个模块放入一个父级模块中调用，可以将复杂度有效分散到各个层级。
@@ -41,7 +54,6 @@ IM
 ## stage_D
 D_reg       
 CU_D     
-MUX_4(GRF_reg_addr)     
 MUX_8(GRF_reg_data)     
 GRF 有 stage_W 写回部分
 EXT

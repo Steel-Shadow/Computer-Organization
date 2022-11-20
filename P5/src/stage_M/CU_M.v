@@ -8,13 +8,15 @@ module CU_M (
     output [ 15:0] imm,
     output [ 25:0] j_address,
 
-    output reg mem_write
+    output reg mem_write,
+
+    output reg [4:0] reg_addr  //ÅĞ¶ÏÃ°ÏÕ
 );
     wire [5:0] op = instr[31:26];
-    assign rs        = instr[25:21];
-    assign rt        = instr[20:16];
-    assign rd        = instr[15:11];
-    assign shamt     = instr[10:6];
+    assign rs    = instr[25:21];
+    assign rt    = instr[20:16];
+    assign rd    = instr[15:11];
+    assign shamt = instr[10:6];
     wire [5:0] func = instr[5:0];
     assign imm       = instr[15:0];
     assign j_address = instr[25:0];
@@ -35,5 +37,11 @@ module CU_M (
 
     always @(*) begin
         mem_write = (sw);
+
+        //reg_addr ÅĞ¶ÏÃ°ÏÕ
+        if (add | sub | sll) reg_addr = rd;  //rd
+        else if (lw | lui | ori) reg_addr = rt;  //rt
+        else if (jal) reg_addr = 5'd31;  //$ra $31
+        else reg_addr = 5'd0;  //$0
     end
 endmodule

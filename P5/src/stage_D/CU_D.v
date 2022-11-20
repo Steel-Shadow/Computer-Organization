@@ -9,14 +9,14 @@ module CU_D (
     output [ 25:0] j_address,
 
     output reg [2:0] next_pc_op,  //PC
+    output reg [2:0] ext_op,      //EXT
+    output reg       a1_op,       // sll时为1
 
-    output reg [2:0] ext_op,  //EXT
+    input [4:0] reg_addr_E,  //处理冲突
+    input [4:0] reg_addr_M,
 
-    output reg a1_op,  // sll时为1
-
-    output reg [1:0] Tuse_rs,
-    output reg [1:0] Tuse_rt,
-    output reg [1:0] Tnew
+    output reg [1:0] Tnew,
+    output reg       stall
 );
     wire [5:0] op = instr[31:26];
     assign rs    = instr[25:21];
@@ -41,10 +41,19 @@ module CU_D (
     wire lui = op == 6'b001111;
     wire jal = op == 6'b000011;
 
+    //分组用于Tuse Tnew分析
     wire cal_r = (add | sub | sll);
     wire cal_i = (ori | lui);
     wire load = lw;
     wire store = sw;
+
+    //stall
+    reg                                 [1:0] Tuse_rs;
+    reg                                 [1:0] Tuse_rt;
+    reg                                       stall_rs_E;
+    reg                                       stall_rs_M;
+    reg                                       stall_rt_E;
+    reg                                       stall_rt_M;
 
     always @(*) begin
         /********* PC *************************/
@@ -62,6 +71,8 @@ module CU_D (
         else if (sll) ext_op = 3'd2;  //zero_ext shamt
         else ext_op = 3'd3;  //z
 
+        ///////////////////////// 冒险处理模块 //////////////////////////////////////
+
         /********* Tuse ************************/
         if (beq | jr) Tuse_rs = 2'd0;
         else if ((cal_r & ~sll) | cal_i | load | store) Tuse_rs = 2'd1;
@@ -77,5 +88,14 @@ module CU_D (
         else if (cal_r | cal_i) Tnew = 2'd1;
         else if (load | store | jal) Tnew = 2'd2;
         else Tnew = 2'd0;  //默认初始产生 不产生新数据
+
+        /********* stall ***********************/
+        stall_rs_E = (Tuse_rs < Tnew_E) & (rs != 5'd0 & rs == reg_addr_E);  //若不可写则reg_addr=0
+        stall_rs_M = (Tuse_rs < Tnew_M) & (rs != 5'd0 & rs == reg_addr_M);
+
+        stall_rt_E = (Tuse_rt < Tnew_E) & (rt != 5'd0 & rt == reg_addr_E);
+        stall_rt_M = (Tuse_rt < Tnew_M) & (rt != 5'd0 & rt == reg_addr_M);
+
+        stall      = (stall_rs_E | stall_rs_M) | (stall_rt_E | stall_rt_M);
     end
 endmodule

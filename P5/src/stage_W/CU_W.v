@@ -9,7 +9,7 @@ module CU_W (
     output [ 25:0] j_address,
 
     output reg       reg_write,
-    output reg [1:0] reg_addr_op,
+    output reg [4:0] reg_addr,
     output reg [2:0] reg_data_op
 );
     wire [5:0] op = instr[31:26];
@@ -38,11 +38,11 @@ module CU_W (
     always @(*) begin
         reg_write = (add | sub | ori | lw | lui | jal | sll);
 
-        //reg_addr_op
-        if (add | sub | sll) reg_addr_op = 2'd0;  //rd
-        else if (lw | lui | ori) reg_addr_op = 2'd1;  //rt
-        else if (jal) reg_addr_op = 2'd2;  //$ra $31
-        else reg_addr_op = 2'd3;  //z
+        //reg_addr
+        if (add | sub | sll) reg_addr = rd;  //rd
+        else if (lw | lui | ori) reg_addr = rt;  //rt
+        else if (jal) reg_addr = 5'd31;  //$ra $31
+        else reg_addr = 5'd0;  //$0
 
         //reg_data_op
         if (lw) reg_data_op = 3'd1;  //dm_out

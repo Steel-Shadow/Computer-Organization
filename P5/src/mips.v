@@ -32,9 +32,10 @@ module mips (
     wire [  2:0] ext_op_D;  //EXT
     wire [ 31:0] ext_D;
 
-    wire [  1:0] Tuse_rs;
+    wire [  1:0] Tuse_rs;  //冒险处理
     wire [  1:0] Tuse_rt;
     wire [  1:0] Tnew;
+    wire         stall;
 
     //////////////////////////////////////////// E
     wire [ 31:0] pc_E;
@@ -56,6 +57,7 @@ module mips (
     wire [ 31:0] alu_out_E;
 
     wire [  1:0] Tnew_E;
+    wire [  4:0] reg_addr_E;
 
     //////////////////////////////////////////// M
     wire [ 31:0] pc_M;
@@ -78,6 +80,7 @@ module mips (
     wire [ 31:0] dm_out_M;
 
     wire [  1:0] Tnew_M;
+    wire [  4:0] reg_addr_M;
 
     //////////////////////////////////////////// W
     wire [ 31:0] pc_W;
@@ -101,7 +104,6 @@ module mips (
     wire         reg_write_W;  //GRF写回
     wire [  2:0] reg_data_op_W;
     wire [ 31:0] reg_data_W;
-    wire [  1:0] reg_addr_op_W;
     wire [  4:0] reg_addr_W;
 
     /************   stage_F    ************/
@@ -152,9 +154,8 @@ module mips (
 
         .a1_op(a1_op_D),
 
-        .Tuse_rs(Tuse_rs),
-        .Tuse_rt(Tuse_rt),
-        .Tnew   (Tnew)
+        .Tnew (Tnew),
+        .stall(stall)
     );
 
     GRF u_GRF (
@@ -213,7 +214,9 @@ module mips (
         .j_address(j_address_E),
 
         .alu_b_op(alu_b_op_E),
-        .alu_op  (alu_op_E)
+        .alu_op  (alu_op_E),
+
+        .reg_addr(reg_addr_E)
     );
 
     ALU u_ALU (
@@ -235,7 +238,7 @@ module mips (
         .in_read2  (read2_E),
         .in_ext    (ext_E),
         .in_alu_out(alu_out_E),
-        .in_Tnew   (Tnew_E - 2'b1 > 0 ? Tnew_E : 0),
+        .in_Tnew   (Tnew_E - 2'b1 > 0 ? Tnew_E - 2'b1 : 2'b0),
 
         .out_pc     (pc_M),
         .out_instr  (instr_M),
@@ -243,7 +246,7 @@ module mips (
         .out_read2  (read2_M),
         .out_ext    (ext_M),
         .out_alu_out(alu_out_M),
-        .out_Tnew   (Tnew_M),
+        .out_Tnew   (Tnew_M)
     );
 
     CU_M u_CU_M (
@@ -255,7 +258,9 @@ module mips (
         .shamt    (shamt_M),
         .imm      (imm_M),
         .j_address(j_address_M),
-        .mem_write(mem_write_M)
+        .mem_write(mem_write_M),
+
+        .reg_addr(reg_addr_M)
     );
 
     DM u_DM (
@@ -303,20 +308,8 @@ module mips (
         .j_address(j_address_W),
 
         .reg_write  (reg_write_W),
-        .reg_addr_op(reg_addr_op_W),
+        .reg_addr   (reg_addr_W),
         .reg_data_op(reg_data_op_W)
-    );
-
-    MUX_4 #(  //GRF的reg_addr选择
-        .DATA_WIDTH(5)
-    ) u_MUX_4_GRF_reg_addr (
-        .sel  (reg_addr_op_W),
-        .data0(rd_W),
-        .data1(rt_W),
-        .data2(5'd31),
-        .data3(),
-
-        .ans(reg_addr_W)
     );
 
     MUX_8 u_MUX_8_GRF_reg_data (  // MUX_8 GRF的reg_data选择 
