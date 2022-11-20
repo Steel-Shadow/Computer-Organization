@@ -18,8 +18,8 @@ $display("@%h: $%d <= %h", WPC, Waddr, WData);
 */
     reg [31:0] registers[31:0];
 
-    assign read1 = registers[a1];
-    assign read2 = registers[a2];
+    assign read1 = (reg_addr == a1 & a1 != 5'd0) ? reg_data : registers[a1];
+    assign read2 = (reg_addr == a2 & a2 != 5'd0) ? reg_data : registers[a2];
 
     integer i;
     always @(posedge clk) begin

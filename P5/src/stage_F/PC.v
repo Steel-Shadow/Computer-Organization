@@ -12,6 +12,8 @@ module PC (
     input [31:0] in6,
     input [31:0] in7,
 
+    input stall,
+
     output [31:0] pc_out
 );
     reg [31:0] pc;
@@ -37,7 +39,7 @@ module PC (
         if (reset) begin
             pc <= 32'h3000;
         end else begin
-            pc <= next_pc;
+            pc <= stall ? pc : next_pc;
         end
     end
 

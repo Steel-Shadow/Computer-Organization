@@ -6,6 +6,7 @@ add, sub, ori, lw, sw, beq, lui, jal, jr, nop
 1. 流水线寄存器+单指令功能  
 2. 阻塞实现   
 
+    没注明的Tuse为3如sll的Tuse_rs
     |    instr_D     |  reg  | Tuse  |
     | :------------: | :---: | :---: |
     |      beq       | rs/rt |   0   |
@@ -14,8 +15,8 @@ add, sub, ori, lw, sw, beq, lui, jal, jr, nop
     |      load      |  rs   |   1   |
     |     store      |  rs   |   1   |
     |     store      |  rt   |   2   |
-    没注明的Tuse为3如sll的Tuse_rs
-
+    
+    只需考虑 Tnew_E 运算得 Tnew_M Tnew_W 恒等于0
     | instr_D | Tnew  |
     | :-----: | :---: |
     |   beq   |   0   |
@@ -24,9 +25,8 @@ add, sub, ori, lw, sw, beq, lui, jal, jr, nop
     |  load   |   1   |
     |  store  |   1   |
     |  store  |   2   |
-    只需考虑 Tnew_E 此后递归运算
 
-    ![图 1](images/Stall_Forwad.png)  
+    stall不判断reg_write(若不可写则reg_addr=0)
 
     冒险控制模块合并于CU_D中
 
@@ -35,13 +35,13 @@ add, sub, ori, lw, sw, beq, lui, jal, jr, nop
     当 Tuse < Tnew 时，我们需要阻塞流水线。
     阻塞的实现需要改造流水线寄存器和 PC ，我们需要让它们具有以下功能：
 
-    冻结 PC 的值；
-    冻结 D 级流水线寄存器的值；
-    将 E 级流水线寄存器清零（这等价于插入了一个 nop 指令）。
+    + 冻结 PC 的值；
+    + 冻结 D 级流水线寄存器的值；(无需在D_reg中添加 因为pc_F不变)
+    + 将 E 级流水线寄存器清零（这等价于在instr_D前插入了一个 nop 指令）。
     此外，还有一个考虑，就是复位信号和阻塞信号的优先级问题。请仔细设计信号的优先级来保证流水线的正确性。
 
 3. GRF内部转发实现
-4. 转发实现  
+4. 转发实现
 5. 测试优化
 
 在设计时，可以利用这一点，按照流水级的顺序对每一级的流水寄存器进行实例化，然后在其间插入相应级的模块，并用注释清晰地注明各级起始位置。

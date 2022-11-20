@@ -117,6 +117,8 @@ module mips (
         .in2       ({pc_D[31:28], j_address_D, 2'b00}),                                                   //jal PC31..28 || instr_index || 0^2
         .in3       (read1_D),                                                                             //jr PC <- GPR[rs]
 
+        .stall(stall),
+
         .pc_out(pc_F)
     );
 

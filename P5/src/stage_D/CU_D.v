@@ -96,6 +96,6 @@ module CU_D (
         stall_rt_E = (Tuse_rt < Tnew_E) & (rt != 5'd0 & rt == reg_addr_E);
         stall_rt_M = (Tuse_rt < Tnew_M) & (rt != 5'd0 & rt == reg_addr_M);
 
-        stall      = (stall_rs_E | stall_rs_M) | (stall_rt_E | stall_rt_M);
+        stall     = (stall_rs_E | stall_rs_M) | (stall_rt_E | stall_rt_M);
     end
 endmodule

@@ -9,6 +9,8 @@ module E_reg (
     input [31:0] in_ext,
     input [ 1:0] in_Tnew,
 
+    input stall,
+
     output [31:0] out_pc,
     output [31:0] out_instr,
     output [31:0] out_read1,
@@ -39,12 +41,12 @@ module E_reg (
             ext_E   <= 32'b0;
             Tnew_E  <= 2'b0;
         end else begin
-            pc_E    <= in_pc;
-            instr_E <= in_instr;
-            read1_E <= in_read1;
-            read2_E <= in_read2;
-            ext_E   <= in_ext;
-            Tnew_E  <= in_Tnew;
+            pc_E    <= stall ? 32'h3000 : in_pc;
+            instr_E <= stall ? 32'b0 : in_instr;
+            read1_E <= stall ? 32'b0 : in_read1;
+            read2_E <= stall ? 32'b0 : in_read2;
+            ext_E   <= stall ? 32'b0 : in_ext;
+            Tnew_E  <= stall ? 2'b0 : in_Tnew;
         end
     end
 endmodule

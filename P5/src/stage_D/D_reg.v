@@ -23,11 +23,11 @@ module D_reg (
         if (reset) begin
             pc_D    <= 32'h3000;
             instr_D <= 32'b0;
-            Tuse  <= 2'b0;
+            Tuse    <= 2'b0;
         end else begin
             pc_D    <= in_pc;
             instr_D <= in_instr;
-            Tuse<=in_Tuse;
+            Tuse    <= in_Tuse;
         end
     end
 endmodule
