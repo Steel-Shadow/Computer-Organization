@@ -42,7 +42,6 @@ module DATAPATH (
         .in1       (alu_out == 32'b0 ? pc + 32'd4 + {{14{imm[15]}}, imm, 2'b00} : pc + 32'd4),  //beq alu_out==0 pc<-pc+4+sign_ext_offset||00
         .in2       ({pc[31:28], j_address, 2'b00}),                                             //jal PC31..28 || instr_index || 0^2
         .in3       (read1),                                                                     //jr PC <- GPR[rs]
-        .in4       (),
         .in5       (),
         .in6       (),
         .in7       (),

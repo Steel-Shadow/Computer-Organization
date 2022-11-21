@@ -37,7 +37,7 @@ module CU (
 
     output reg [3:0] alu_op,   // ALU部分
     output reg [2:0] alu_b_op,
-
+    
     output reg mem_write  //DM部分
 );
     wire [5:0] func;
@@ -61,56 +61,24 @@ module CU (
 
     //add, sub, ori, lw, sw, beq, lui, jal, jr, nop    添加sll lh slt
     reg add, sub, ori, lw, sw, beq, lui, jal, jr, sll, lh, slt, srav;  //op
-    reg func_add, func_sub, func_jr, func_sll, func_slt, func_srav;  //func
+
 
     always @(*) begin
-        func_add  = 1'b0;
-        func_sub  = 1'b0;
-        func_jr   = 1'b0;
-        func_sll  = 1'b0;
-        func_slt  = 1'b0;
-        func_srav = 1'b0;
-        case (func)
-            6'b100000: func_add = 1'b1;
-            6'b100010: func_sub = 1'b1;
-            6'b001000: func_jr = 1'b1;
-            6'b000000: func_sll = 1'b1;
-            6'b101010: func_slt = 1'b1;
-            6'b000111: func_srav = 1'b1;
-            default:   ;
-        endcase
+        //R型指令
+        add   = (op == 6'b000000 & func == 6'b100000) ? 1'b1 : 1'b0;
+        sub   = (op == 6'b000000 & func == 6'b100010) ? 1'b1 : 1'b0;
+        jr    = (op == 6'b000000 & func == 6'b001000) ? 1'b1 : 1'b0;
+        sll   = (op == 6'b000000 & func == 6'b000000) ? 1'b1 : 1'b0;
+        slt   = (op == 6'b000000 & func == 6'b101010) ? 1'b1 : 1'b0;
+        srav  = (op == 6'b000000 & func == 6'b000111) ? 1'b1 : 1'b0;
 
-        add  = 1'b0;
-        sub  = 1'b0;
-        jr   = 1'b0;
-        sll  = 1'b0;
-        ori  = 1'b0;
-        lw   = 1'b0;
-        sw   = 1'b0;
-        beq  = 1'b0;
-        lui  = 1'b0;
-        jal  = 1'b0;
-        lh   = 1'b0;
-        slt  = 1'b0;
-        srav = 1'b0;
-        case (op)
-            6'b000000: begin
-                add  = func_add;
-                sub  = func_sub;
-                jr   = func_jr;
-                sll  = func_sll;
-                slt  = func_slt;
-                srav = func_srav;
-            end
-            6'b001101: ori = 1'b1;
-            6'b100011: lw = 1'b1;
-            6'b101011: sw = 1'b1;
-            6'b000100: beq = 1'b1;
-            6'b001111: lui = 1'b1;
-            6'b000011: jal = 1'b1;
-            6'b100001: lh = 1'b1;
-            default:   ;
-        endcase
+        ori   = (op == 6'b001101) ? 1'b1 : 1'b0;
+        lw    = (op == 6'b100011) ? 1'b1 : 1'b0;
+        sw    = (op == 6'b101011) ? 1'b1 : 1'b0;
+        beq   = (op == 6'b000100) ? 1'b1 : 1'b0;
+        lui   = (op == 6'b001111) ? 1'b1 : 1'b0;
+        jal   = (op == 6'b000011) ? 1'b1 : 1'b0;
+        lh    = (op == 6'b100001) ? 1'b1 : 1'b0;
 
         /* next_pc_op
         reg_write a1_op reg_addr_op reg_data_op
@@ -123,19 +91,19 @@ module CU (
         else if (jr) next_pc_op = 3'd3;
         else next_pc_op = 3'd0;
 
-        reg_write = (add | sub | ori | lw | lui | jal | sll | lh | slt | srav);
+        reg_write = (add | sub | ori | lw | lui | jal | sll | lh | slt | srav );
         a1_op     = sll;
 
         //rd-0 rt-1 $ra=31-2 
         if (add | sub | sll | slt) reg_addr_op = 2'd0;  //rd
         else if (lw | lui | ori | lh) reg_addr_op = 2'd1;  //rt
-        else if (jal) reg_addr_op = 2'd2;  //$ra $31
+        else if (jal ) reg_addr_op = 2'd2;  //$ra $31
         else reg_addr_op = 2'd3;  //error
 
         //3位
         if (lw) reg_data_op = 3'd1;  //dm_out
         else if (lui) reg_data_op = 3'd2;  //imm<<16
-        else if (jal) reg_data_op = 3'd3;  //pc+4
+        else if (jal ) reg_data_op = 3'd3;  //pc+4
         else if (lh) reg_data_op = 3'd4;  //dm_out lh
         else if (slt) reg_data_op = 3'd5;  //slt
         else reg_data_op = 3'd0;  //alu_out
