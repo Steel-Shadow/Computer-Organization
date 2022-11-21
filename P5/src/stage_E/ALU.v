@@ -1,7 +1,8 @@
 module ALU (
-    input  [31:0] a,
-    input  [31:0] b,
-    input  [ 2:0] alu_op,
+    input  [31:0] rs,
+    input  [31:0] rt,
+    input  [31:0] ext,
+    input  [ 3:0] alu_op,
     output [31:0] alu_out
 );
     //+ - | compare(>1 ==0 <-1) ÓÐ·ûºÅ±È½Ï
@@ -11,12 +12,12 @@ module ALU (
 
     always @(*) begin
         case (alu_op)
-            3'd0: ans = a + b;
-            3'd1: ans = a - b;
-            3'd2: ans = a | b;
-            3'd3: ans = a << b;
-            3'd4: ans = b << 5'd16;
-            // 4: ans = ($signed(a) > $signed(b) ? 1 : a == b ? 0 : -1);
+            4'd0: ans = rs + rt;  //add
+            4'd1: ans = rs - rt;  //sub
+            4'd2: ans = rs | ext;  //ori
+            4'd3: ans = rs + ext;  //lw sw
+            4'd4: ans = ext << 5'd16;  //lui
+            4'd5: ans = rt << ext;  //sll
             default: ans = 0;
         endcase
     end

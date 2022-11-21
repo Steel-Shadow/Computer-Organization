@@ -36,7 +36,7 @@ module mips (
     wire         a1_op;
     wire [  1:0] reg_addr_op;
     wire [  2:0] reg_data_op;
-    wire [  2:0] alu_op;
+    wire [  3:0] alu_op;
     wire [  2:0] alu_b_op;
     wire         mem_write;
 

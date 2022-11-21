@@ -1,31 +1,92 @@
-北航计组答案
-理论作业
-预习资料
+.idea
+.vscode
+isim
+out
+.VSCodeCounter
 
-*/*
+鍖楄埅璁＄粍绛旀
+璇句欢
+鐞嗚浣滀笟
+棰勪範璧勬枡
 
-*/**/.idea
-*/**/out
+*._summary
+*.wdb
+*._xmsgs
+*.cmd
+*.sym
+*.xmsgs
+*.log
+*.xise
+*.exe
+*.ini
+.gitignore
+*.zip
+*.jar
 
-!logisim-win-2.7.1.exe
+# intermediate build files
+*.bgn
+*.bit
+*.bld
+*.cmd_log
+*.drc
+*.ll
+*.lso
+*.msd
+*.msk
+*.ncd
+*.ngc
+*.ngd
+*.ngr
+*.pad
+*.par
+*.pcf
+*.prj
+*.ptwx
+*.rbb
+*.rbd
+*.stx
+*.syr
+*.twr
+*.twx
+*.unroutes
+*.ut
+*.xpi
+*.xst
+*_bitgen.xwbt
+*_envsettings.html
+*_map.map
+*_map.mrp
+*_map.ngm
+*_map.xrpt
+*_ngdbuild.xrpt
+*_pad.csv
+*_pad.txt
+*_par.xrpt
+*_summary.html
+*_summary.xml
+*_usage.xml
+*_xst.xrpt
 
-!src
-!*.java
+# iMPACT generated files
+_impactbatch.log
+impact.xsl
+impact_impact.xwbt
+ise_impact.cmd
+webtalk_impact.xml
 
-!datapath
-!*.wcfg
+# Core Generator generated files
+xaw2verilog.log
 
-!test
+# project-wide generated files
+*.gise
+par_usage_statistics.html
+usage_statistics_webtalk.html
+webtalk.log
+webtalk_pn.xml
 
-!*.md
-!*.txt
-!image
-!images
-!*.png
-
-!*.circ
-!*.v
-!*.asm
-!*.c
-
-!*.bat 
+# generated folders
+iseconfig/
+xlnx_auto_0_xdb/
+xst/
+_ngo/
+_xmsgs/

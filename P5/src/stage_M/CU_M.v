@@ -10,7 +10,7 @@ module CU_M (
 
     output reg mem_write,
 
-    output reg [4:0] reg_addr  //判断冒险
+    output reg [ 4:0] reg_addr,  //判断冒险
 );
     wire [5:0] op = instr[31:26];
     assign rs    = instr[25:21];
@@ -35,6 +35,12 @@ module CU_M (
     wire lui = (op == 6'b001111);
     wire jal = (op == 6'b000011);
 
+    //分组用于转发分析
+    wire cal_r = (add | sub | sll);
+    wire cal_i = (ori | lui);
+    wire load = lw;
+    wire store = sw;
+
     always @(*) begin
         mem_write = (sw);
 
@@ -43,5 +49,6 @@ module CU_M (
         else if (lw | lui | ori) reg_addr = rt;  //rt
         else if (jal) reg_addr = 5'd31;  //$ra $31
         else reg_addr = 5'd0;  //$0
+
     end
 endmodule

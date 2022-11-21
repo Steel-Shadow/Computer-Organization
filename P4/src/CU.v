@@ -35,7 +35,7 @@ module CU (
     output reg [1:0] reg_addr_op,  // rd-0 rt-1 $ra=31-2 
     output reg [2:0] reg_data_op,  // 
 
-    output reg [2:0] alu_op,   // ALU部分
+    output reg [3:0] alu_op,   // ALU部分
     output reg [2:0] alu_b_op,
 
     output reg mem_write  //DM部分
@@ -141,13 +141,13 @@ module CU (
         else reg_data_op = 3'd0;  //alu_out
 
         // + - | compare(>1 ==0 <-1) 有符号比较 
-        if (add | lw | lh) alu_op = 3'd0;
-        else if (sub) alu_op = 3'd1;
-        else if (ori) alu_op = 3'd2;
-        else if (beq | slt) alu_op = 3'd3;
-        else if (sll) alu_op = 3'd4;
-        else if (srav) alu_op = 3'd5;  //算术右移 保留符号位 b>>a
-        else alu_op = 3'd0;
+        if (add | lw | lh) alu_op = 4'd0;
+        else if (sub) alu_op = 4'd1;
+        else if (ori) alu_op = 4'd2;
+        else if (beq | slt) alu_op = 4'd3;
+        else if (sll) alu_op = 4'd4;
+        else if (srav) alu_op = 4'd5;  //算术右移 保留符号位 b>>a
+        else alu_op = 4'd0;
 
         //3位
         if (lw | sw | lh) alu_b_op = 3'd1;  //sign_ext imm

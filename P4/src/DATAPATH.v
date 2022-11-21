@@ -16,7 +16,7 @@ module DATAPATH (
     input [1:0] reg_addr_op,
     input [2:0] reg_data_op,
 
-    input [2:0] alu_op,
+    input [3:0] alu_op,
     input [2:0] alu_b_op,
 
     input mem_write,

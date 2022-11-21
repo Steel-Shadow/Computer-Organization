@@ -10,13 +10,15 @@ module CU_W (
 
     output reg       reg_write,
     output reg [4:0] reg_addr,
-    output reg [2:0] reg_data_op
+    output reg [2:0] reg_data_op,
+
+    output reg [2:0] give_W_op
 );
     wire [5:0] op = instr[31:26];
-    assign rs        = instr[25:21];
-    assign rt        = instr[20:16];
-    assign rd        = instr[15:11];
-    assign shamt     = instr[10:6];
+    assign rs    = instr[25:21];
+    assign rt    = instr[20:16];
+    assign rd    = instr[15:11];
+    assign shamt = instr[10:6];
     wire [5:0] func = instr[5:0];
     assign imm       = instr[15:0];
     assign j_address = instr[25:0];
@@ -35,6 +37,11 @@ module CU_W (
     wire lui = (op == 6'b001111);
     wire jal = (op == 6'b000011);
 
+    wire cal_r = (add | sub | sll);
+    wire cal_i = (ori | lui);
+    wire load = lw;
+    wire store = sw;
+
     always @(*) begin
         reg_write = (add | sub | ori | lw | lui | jal | sll);
 
@@ -48,5 +55,10 @@ module CU_W (
         if (lw) reg_data_op = 3'd1;  //dm_out
         else if (jal) reg_data_op = 3'd2;  //pc_W+8
         else reg_data_op = 3'd0;  //alu_out
+
+        if (cal_r | cal_i) give_W_op = 3'd0;  //alu_out_M
+        else if (lw) give_W_op = 3'd1;  //dm_out_M
+        else if (jal) give_W_op = 3'd2;  //pc_W+8
+        else give_W_op = 3'd7;  //z
     end
 endmodule

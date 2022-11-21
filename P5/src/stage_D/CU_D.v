@@ -10,13 +10,17 @@ module CU_D (
 
     output reg [2:0] next_pc_op,  //PC
     output reg [2:0] ext_op,      //EXT
-    output reg       a1_op,       // sll时为1
 
     input [4:0] reg_addr_E,  //处理冲突
     input [4:0] reg_addr_M,
 
+    input      [1:0] Tnew_E,
+    input      [1:0] Tnew_M,
     output reg [1:0] Tnew,
-    output reg       stall
+
+    output reg stall,
+                                    // output reg fwd_rs_data_D_op
+                                    // output reg fwd_rt_data_D_op
 );
     wire [5:0] op = instr[31:26];
     assign rs    = instr[25:21];
@@ -55,6 +59,8 @@ module CU_D (
     reg                                       stall_rt_E;
     reg                                       stall_rt_M;
 
+    assign fwd_rs_data_D = (A1_E == A3_M && A1_E != 5'd0 && Tnew_M == 2'b00 && RegWrite_M == 1'b1) ? 2'b10 : (A1_E == A3_W && A1_E != 5'd0 && Tnew_W == 2'b00 && RegWrite_W == 1'b1) ? 2'b01 : 2'b00;
+
     always @(*) begin
         /********* PC *************************/
         if (beq) next_pc_op = 3'd1;
@@ -62,14 +68,11 @@ module CU_D (
         else if (jr) next_pc_op = 3'd3;
         else next_pc_op = 3'd0;
 
-        /********* GRF *************************/
-        a1_op = sll;
-
         /********* EXT *************************/
         if (lw | sw) ext_op = 3'd0;  //sign_ext imm
-        else if (ori) ext_op = 3'd1;  //zero_ext imm
+        else if (ori | lui) ext_op = 3'd1;  //zero_ext imm
         else if (sll) ext_op = 3'd2;  //zero_ext shamt
-        else ext_op = 3'd3;  //z
+        else ext_op = 3'd3;  //0
 
         ///////////////////////// 冒险处理模块 //////////////////////////////////////
 
@@ -96,6 +99,6 @@ module CU_D (
         stall_rt_E = (Tuse_rt < Tnew_E) & (rt != 5'd0 & rt == reg_addr_E);
         stall_rt_M = (Tuse_rt < Tnew_M) & (rt != 5'd0 & rt == reg_addr_M);
 
-        stall     = (stall_rs_E | stall_rs_M) | (stall_rt_E | stall_rt_M);
+        stall      = (stall_rs_E | stall_rs_M) | (stall_rt_E | stall_rt_M);
     end
 endmodule

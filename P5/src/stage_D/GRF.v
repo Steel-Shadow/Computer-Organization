@@ -3,12 +3,12 @@ module GRF (
     input         clk,
     input  [31:0] pc,
     input         reg_write,
-    input  [ 4:0] a1,
-    input  [ 4:0] a2,
+    input  [ 4:0] rs,
+    input  [ 4:0] rt,
     input  [ 4:0] reg_addr,
     input  [31:0] reg_data,
-    output [31:0] read1,
-    output [31:0] read2
+    output [31:0] rs_data,
+    output [31:0] rt_data
 );
     /*
 在 GRF 模块中，每个时钟上升沿到来时若要写入数据（即写使能信号为 1 且非 reset 时）则输出写入的位置及写入的值，格式（请注意空格）为：
@@ -18,8 +18,8 @@ $display("@%h: $%d <= %h", WPC, Waddr, WData);
 */
     reg [31:0] registers[31:0];
 
-    assign read1 = (reg_addr == a1 & a1 != 5'd0) ? reg_data : registers[a1];
-    assign read2 = (reg_addr == a2 & a2 != 5'd0) ? reg_data : registers[a2];
+    assign rs_data = (reg_addr == rs & rs != 5'd0) ? reg_data : registers[rs];
+    assign rt_data = (reg_addr == rt & rt != 5'd0) ? reg_data : registers[rt];
 
     integer i;
     always @(posedge clk) begin

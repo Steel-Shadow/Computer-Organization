@@ -25,9 +25,8 @@ module mips (
     wire [ 15:0] imm_D;
     wire [ 25:0] j_address_D;
 
-    wire         a1_op_D;  //GRF读取
-    wire [ 31:0] read1_D;
-    wire [ 31:0] read2_D;
+    wire [ 31:0] rs_data_D;
+    wire [ 31:0] rt_data_D;
 
     wire [  2:0] ext_op_D;  //EXT
     wire [ 31:0] ext_D;
@@ -36,6 +35,12 @@ module mips (
     wire [  1:0] Tuse_rt;
     wire [  1:0] Tnew;
     wire         stall;
+
+    wire [ 31:0] fwd_rs_data_D;
+    wire [ 31:0] fwd_rt_data_D;
+
+    wire [  1:0] fwd_rs_data_D_op;
+    wire [  1:0] fwd_rt_data_D_op;
 
     //////////////////////////////////////////// E
     wire [ 31:0] pc_E;
@@ -47,13 +52,13 @@ module mips (
     wire [ 15:0] imm_E;
     wire [ 25:0] j_address_E;
 
-    wire [ 31:0] read1_E;
-    wire [ 31:0] read2_E;
+    wire [ 31:0] rs_data_E;
+    wire [ 31:0] rt_data_E;
 
     wire [ 31:0] ext_E;
 
     wire         alu_b_op_E;  //ALU
-    wire [  2:0] alu_op_E;
+    wire [  3:0] alu_op_E;
     wire [ 31:0] alu_out_E;
 
     wire [  1:0] Tnew_E;
@@ -69,8 +74,8 @@ module mips (
     wire [ 15:0] imm_M;
     wire [ 25:0] j_address_M;
 
-    wire [ 31:0] read1_M;
-    wire [ 31:0] read2_M;
+    wire [ 31:0] rs_data_M;
+    wire [ 31:0] rt_data_M;
 
     wire [ 31:0] ext_M;
 
@@ -82,6 +87,8 @@ module mips (
     wire [  1:0] Tnew_M;
     wire [  4:0] reg_addr_M;
 
+    wire [ 31:0] give_M;
+
     //////////////////////////////////////////// W
     wire [ 31:0] pc_W;
     wire [ 31:0] instr_W;
@@ -92,8 +99,8 @@ module mips (
     wire [ 15:0] imm_W;
     wire [ 25:0] j_address_W;
 
-    wire [ 31:0] read1_W;
-    wire [ 31:0] read2_W;
+    wire [ 31:0] rs_data_W;
+    wire [ 31:0] rt_data_W;
 
     wire [ 31:0] ext_W;
 
@@ -106,18 +113,21 @@ module mips (
     wire [ 31:0] reg_data_W;
     wire [  4:0] reg_addr_W;
 
+    wire [ 31:0] give_W;
+    wire [  2:0] give_W_op;
+
     /************   stage_F    ************/
     PC u_PC (
         .clk  (clk),
         .reset(reset),
 
         .next_pc_op(next_pc_op_F),
-        .in0       (pc_F + 32'd4),                                                                        //in0~7
-        .in1       (read1_D == read2_D ? pc_D + 32'd8 + {{14{imm_D[15]}}, imm_D, 2'b00} : pc_D + 32'd8),
-        .in2       ({pc_D[31:28], j_address_D, 2'b00}),                                                   //jal PC31..28 || instr_index || 0^2
-        .in3       (read1_D),                                                                             //jr PC <- GPR[rs]
+        .stall     (stall),
 
-        .stall(stall),
+        .rs_data_D  (fwd_rs_data_D),  //NPC实际上在D中
+        .rt_data_D  (fwd_rt_data_D),
+        .imm_D      (imm_D),
+        .j_address_D(j_address_D),
 
         .pc_out(pc_F)
     );
@@ -140,6 +150,25 @@ module mips (
         .out_instr(instr_D)
     );
 
+
+    MUX_4 u_MUX_4_fwd_rs_data_D (
+        .sel  (fwd_rs_data_D_op),
+        .data2(give_M),
+        .data1(give_W),
+        .data0(rs_data_D),
+
+        .ans(fwd_rs_data_D)
+    );
+
+    MUX_4 u_MUX_4_fwd_rt_data_D (
+        .sel  (fwd_rt_data_D_op),
+        .data2(give_M),
+        .data1(give_W),
+        .data0(rt_data_D),
+
+        .ans(fwd_rt_data_D)
+    );
+
     CU_D u_CU_D (
         .instr(instr_D),
 
@@ -154,10 +183,13 @@ module mips (
 
         .ext_op(ext_op_D),
 
-        .a1_op(a1_op_D),
+        .reg_addr_E(reg_addr_E),
+        .reg_addr_M(reg_addr_M),
 
-        .Tnew (Tnew),
-        .stall(stall)
+        .Tnew_E(Tnew_E),
+        .Tnew_M(Tnew_M),
+        .Tnew  (Tnew),
+        .stall (stall)
     );
 
     GRF u_GRF (
@@ -166,10 +198,10 @@ module mips (
         .pc   (pc_W),
 
         //stage_D读取
-        .a1   (a1_op_D ? rt_D : rs_D),
-        .a2   (rt_D),
-        .read1(read1_D),
-        .read2(read2_D),
+        .rs     (rs_D),
+        .rt     (rt_D),
+        .rs_data(rs_data_D),
+        .rt_data(rt_data_D),
 
         //stage_W写回
         .reg_write(reg_write_W),
@@ -190,19 +222,21 @@ module mips (
         .clk  (clk),
         .reset(reset),
 
-        .in_pc   (pc_D),
-        .in_instr(instr_D),
-        .in_read1(read1_D),
-        .in_read2(read2_D),
-        .in_ext  (ext_D),
-        .in_Tnew (Tnew),
+        .in_pc     (pc_D),
+        .in_instr  (instr_D),
+        .in_rs_data(fwd_rs_data_D),
+        .in_rt_data(fwd_rt_data_D),
+        .in_ext    (ext_D),
+        .in_Tnew   (Tnew),
 
-        .out_pc   (pc_E),
-        .out_instr(instr_E),
-        .out_read1(read1_E),
-        .out_read2(read2_E),
-        .out_ext  (ext_E),
-        .out_Tnew (Tnew_E)
+        .stall(stall),
+
+        .out_pc     (pc_E),
+        .out_instr  (instr_E),
+        .out_rs_data(rs_data_E),
+        .out_rt_data(rt_data_E),
+        .out_ext    (ext_E),
+        .out_Tnew   (Tnew_E)
     );
 
     CU_E u_CU_E (
@@ -222,8 +256,9 @@ module mips (
     );
 
     ALU u_ALU (
-        .a     (read1_E),
-        .b     (alu_b_op_E ? ext_E : read2_E),
+        .rs    (rs_data_E),
+        .rt    (rt_data_E),
+        .ext   (ext_E),
         .alu_op(alu_op_E),
 
         .alu_out(alu_out_E)
@@ -236,20 +271,22 @@ module mips (
 
         .in_pc     (pc_E),
         .in_instr  (instr_E),
-        .in_read1  (read1_E),
-        .in_read2  (read2_E),
+        .in_rs_data(rs_data_E),
+        .in_rt_data(rt_data_E),
         .in_ext    (ext_E),
         .in_alu_out(alu_out_E),
         .in_Tnew   (Tnew_E - 2'b1 > 0 ? Tnew_E - 2'b1 : 2'b0),
 
         .out_pc     (pc_M),
         .out_instr  (instr_M),
-        .out_read1  (read1_M),
-        .out_read2  (read2_M),
+        .out_rs_data(rs_data_M),
+        .out_rt_data(rt_data_M),
         .out_ext    (ext_M),
         .out_alu_out(alu_out_M),
-        .out_Tnew   (Tnew_M)
+        .out_Tnew   (Tnew_M),
     );
+
+    assign give_M = alu_out_M;
 
     CU_M u_CU_M (
         .instr(instr_M),
@@ -271,7 +308,7 @@ module mips (
         .pc           (pc_M),
         .mem_write    (mem_write_M),
         .mem_addr_byte(alu_out_M[13:0]),
-        .mem_data     (read2_M),
+        .mem_data     (rt_data_M),
 
         .dm_out(dm_out_M)
     );
@@ -284,19 +321,29 @@ module mips (
 
         .in_pc     (pc_M),
         .in_instr  (instr_M),
-        .in_read1  (read1_M),
-        .in_read2  (read2_M),
+        .in_rs_data(rs_data_M),
+        .in_rt_data(rt_data_M),
         .in_ext    (ext_M),
         .in_alu_out(alu_out_M),
         .in_dm_out (dm_out_M),
 
         .out_pc     (pc_W),
         .out_instr  (instr_W),
-        .out_read1  (read1_W),
-        .out_read2  (read2_W),
+        .out_rs_data(rs_data_W),
+        .out_rt_data(rt_data_W),
         .out_ext    (ext_W),
         .out_alu_out(alu_out_W),
         .out_dm_out (dm_out_W)
+    );
+
+    MUX_8 u_MUX_8_give_W (
+        .sel  (give_W_op),
+        .data0(alu_out_W),
+        .data1(dm_out_W),
+        .data2(pc_W + 32'd8),
+        .data3(32'b0),
+
+        .ans(give_W)
     );
 
     CU_W u_CU_W (
@@ -311,15 +358,19 @@ module mips (
 
         .reg_write  (reg_write_W),
         .reg_addr   (reg_addr_W),
-        .reg_data_op(reg_data_op_W)
+        .reg_data_op(reg_data_op_W),
+
+        .give_W_op(give_W_op)
     );
 
     MUX_8 u_MUX_8_GRF_reg_data (  // MUX_8 GRF的reg_data选择 
-        .sel  (reg_data_op_W),
+        .sel(reg_data_op_W),
+
         .data0(alu_out_W),
         .data1(dm_out_W),
         .data2(pc_W + 32'd8),
         .data3(),
-        .ans  (reg_data_W)
+
+        .ans(reg_data_W)
     );
 endmodule

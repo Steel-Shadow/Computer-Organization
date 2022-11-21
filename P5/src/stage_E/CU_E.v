@@ -9,7 +9,7 @@ module CU_E (
     output [ 25:0] j_address,
 
     output reg       alu_b_op,  //alu²¿·Ö
-    output reg [2:0] alu_op,
+    output reg [3:0] alu_op,
 
     output reg [4:0] reg_addr  //ÅÐ¶ÏÃ°ÏÕ
 );
@@ -37,15 +37,16 @@ module CU_E (
     wire jal = (op == 6'b000011);
 
     always @(*) begin
-        alu_b_op = (ori | lw | sw | sll);  // 0/1 Ñ¡Ôñ read2 / ext
+        alu_b_op = (ori | lw | sw | sll);  // 0/1 Ñ¡Ôñ rt_data / ext
 
-        // + - | compare(>1 ==0 <-1) ÓÐ·ûºÅ±È½Ï 
-        if (add | lw) alu_op = 3'd0;
-        else if (sub) alu_op = 3'd1;
-        else if (ori) alu_op = 3'd2;
-        else if (sll) alu_op = 3'd3;
-        else if (lui) alu_op = 3'd4;  //lui b<<16
-        else alu_op = 3'd0;
+        // + - |
+        if (add) alu_op = 4'd0;
+        else if (sub) alu_op = 4'd1;
+        else if (ori) alu_op = 4'd2;
+        else if (lw | sw) alu_op = 4'd3;
+        else if (lui) alu_op = 4'd4;
+        else if (sll) alu_op = 4'd5;
+        else alu_op = 4'd0;
 
         //reg_addr ÅÐ¶ÏÃ°ÏÕ
         if (add | sub | sll) reg_addr = rd;  //rd
