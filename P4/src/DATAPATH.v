@@ -21,6 +21,8 @@ module DATAPATH (
 
     input mem_write,
 
+    input bnezalc,
+
     output [31:0] instr
 );
     wire [31:0] pc;
@@ -41,7 +43,8 @@ module DATAPATH (
         .in0       (pc + 32'd4),                                                                //pc+4 
         .in1       (alu_out == 32'b0 ? pc + 32'd4 + {{14{imm[15]}}, imm, 2'b00} : pc + 32'd4),  //beq alu_out==0 pc<-pc+4+sign_ext_offset||00
         .in2       ({pc[31:28], j_address, 2'b00}),                                             //jal PC31..28 || instr_index || 0^2
-        .in3       (read1),                                                                     //jr PC <- GPR[rs]
+        .in3       (read1),
+        .in4       (read1 != 32'b0 ? pc + 32'd4 + {{14{imm[15]}}, imm, 2'b00} : pc + 32'd4),
         .in5       (),
         .in6       (),
         .in7       (),
@@ -91,9 +94,9 @@ module DATAPATH (
         .reset    (reset),
         .clk      (clk),
         .pc       (pc),
-        .reg_write(reg_write),
-        .a1       (a1_op ? rt : rs),  //sll时选择rt
-        .a2       (rt),               //rt
+        .reg_write(bnezalc ? ((read1 != 32'd0) ? 1'b1 : 1'b0) : reg_write),
+        .a1       (a1_op ? rt : rs),                                         //sll时选择rt
+        .a2       (rt),                                                      //rt
         .reg_addr (reg_addr),
         .reg_data (reg_data),
 
@@ -124,9 +127,10 @@ module DATAPATH (
         .b     (alu_b),
         .alu_op(alu_op),
 
+        .imm(imm),
+
         .alu_out(alu_out)
     );
-
 
     // DM
     DM u_DM (

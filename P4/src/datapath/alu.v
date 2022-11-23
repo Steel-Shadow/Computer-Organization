@@ -1,6 +1,7 @@
 module ALU (
     input  [31:0] a,
     input  [31:0] b,
+    input  [15:0] imm,
     input  [ 3:0] alu_op,
     output [31:0] alu_out
 );
@@ -20,12 +21,14 @@ module ALU (
             4'd4: ans = a << b;
             4'd5: ans = b >>> a[4:0];
             4'd6: begin
-                cnt = 0;
-                for (i = 0; i < 32; i = i + 1) begin
-                    cnt = a[i];
+                i   = 0;
+                // $display("%d", a);
+                // $display("%d", b);
+                // $stop;
+                ans = a;
+                for (i = 0; i < imm; i = i + 1) begin
+                    ans[i] = ~a[i];
                 end
-                if (a[0]) ans = 1;
-                else ans = 0;
             end
             default: ans = 0;
         endcase

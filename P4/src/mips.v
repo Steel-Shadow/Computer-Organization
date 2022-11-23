@@ -40,6 +40,8 @@ module mips (
     wire [  2:0] alu_b_op;
     wire         mem_write;
 
+    wire         bnezalc;
+
     CU u_CU (
         .instr(instr),
 
@@ -56,7 +58,8 @@ module mips (
         .reg_data_op(reg_data_op),
         .alu_op     (alu_op),
         .alu_b_op   (alu_b_op),
-        .mem_write  (mem_write)
+        .mem_write  (mem_write),
+        .bnezalc    (bnezalc)
     );
 
     DATAPATH u_DATAPATH (
@@ -76,6 +79,8 @@ module mips (
         .alu_op     (alu_op),
         .alu_b_op   (alu_b_op),
         .mem_write  (mem_write),
+
+        .bnezalc(bnezalc),
 
         .instr(instr)
     );
