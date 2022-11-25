@@ -2,8 +2,6 @@
 
 module tb_mips;
 
-    // mips Parameters     
-    parameter PERIOD = 10;
 
     // mips Inputs
     reg clk = 1;
@@ -11,12 +9,10 @@ module tb_mips;
 
     // mips Outputs
 
-    initial begin
-        forever #(PERIOD / 2) clk = ~clk;
-    end
+    always #5 clk = ~clk;
 
     initial begin
-        #(PERIOD * 0.4) reset = 0;
+        #4 reset = 0;
     end
 
     mips u_mips (

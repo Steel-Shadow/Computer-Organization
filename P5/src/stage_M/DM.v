@@ -3,13 +3,13 @@ module DM (
     input         reset,
     input  [31:0] pc,
     input         mem_write,
-    input  [13:0] mem_addr_byte,  //×Ö½ÚbyteµØÖ·
+    input  [13:0] mem_addr_byte,  //å­—èŠ‚byteåœ°å€
     input  [31:0] mem_data,
     output [31:0] dm_out
 );
-    // DM ÈİÁ¿Îª 12KiB£¨3072 ¡Á 32bit£©
-    // ¶¨ÒåÎª4096×Ö °´×ÖÑ°Ö·
-    reg  [31:0] data_mem [4095:0];
+    // DM å®¹é‡ä¸º 12KiBï¼ˆ3072 Ã— 32bitï¼‰
+    // å®šä¹‰ä¸º4096å­— æŒ‰å­—å¯»å€
+    reg  [31:0] data_mem [3071:0];
 
     wire [13:2] mem_addr;
     assign mem_addr = mem_addr_byte[13:2];
@@ -19,12 +19,13 @@ module DM (
     integer i;
     always @(posedge clk) begin
         if (reset) begin
-            for (i = 0; i < 4096; i = i + 1) begin
+            for (i = 0; i < 3072; i = i + 1) begin
                 data_mem[i] <= 32'b0;
             end
         end else begin
             if (mem_write) begin
-                $display("%d@%h: *%h <= %h", $time, pc, {18'b0, mem_addr_byte}, mem_data);
+                // $display("%d@%h: *%h <= %h", $time, pc, {18'b0, mem_addr_byte}, mem_data);
+                $display("@%h: *%h <= %h", pc, {18'b0, mem_addr_byte}, mem_data);
                 data_mem[mem_addr] <= mem_data;
             end
         end

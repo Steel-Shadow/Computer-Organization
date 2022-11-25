@@ -56,9 +56,10 @@ module CU_W (
         else if (jal) reg_data_op = 3'd2;  //pc_W+8
         else reg_data_op = 3'd0;  //alu_out
 
-        if (cal_r | cal_i) give_W_op = 3'd0;  //alu_out_M
-        else if (lw) give_W_op = 3'd1;  //dm_out_M
-        else if (jal) give_W_op = 3'd2;  //pc_W+8
+        //give_W_op
+        if (jal) give_W_op = 3'd0;  //pc_W+8
+        else if (cal_r | cal_i) give_W_op = 3'd1;  //alu_out_M
+        else if (lw) give_W_op = 3'd2;  //dm_out_M
         else give_W_op = 3'd7;  //z
     end
 endmodule

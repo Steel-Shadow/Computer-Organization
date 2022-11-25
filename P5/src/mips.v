@@ -31,16 +31,16 @@ module mips (
     wire [  2:0] ext_op_D;  //EXT
     wire [ 31:0] ext_D;
 
-    wire [  1:0] Tuse_rs;  //Ã°ÏÕ´¦Àí
+    wire [  1:0] Tuse_rs;  //å†’é™©å¤„ç†
     wire [  1:0] Tuse_rt;
     wire [  1:0] Tnew;
     wire         stall;
 
-    wire [ 31:0] fwd_rs_data_D;
-    wire [ 31:0] fwd_rt_data_D;
-
     wire [  1:0] fwd_rs_data_D_op;
     wire [  1:0] fwd_rt_data_D_op;
+
+    wire [ 31:0] fwd_rs_data_D;
+    wire [ 31:0] fwd_rt_data_D;
 
     //////////////////////////////////////////// E
     wire [ 31:0] pc_E;
@@ -57,12 +57,19 @@ module mips (
 
     wire [ 31:0] ext_E;
 
-    wire         alu_b_op_E;  //ALU
-    wire [  3:0] alu_op_E;
+    wire [  3:0] alu_op_E;  //ALU
     wire [ 31:0] alu_out_E;
 
     wire [  1:0] Tnew_E;
     wire [  4:0] reg_addr_E;
+
+    wire [ 31:0] give_E;
+
+    wire [  1:0] fwd_rs_data_E_op;
+    wire [  1:0] fwd_rt_data_E_op;
+
+    wire [ 31:0] fwd_rs_data_E;
+    wire [ 31:0] fwd_rt_data_E;
 
     //////////////////////////////////////////// M
     wire [ 31:0] pc_M;
@@ -87,7 +94,11 @@ module mips (
     wire [  1:0] Tnew_M;
     wire [  4:0] reg_addr_M;
 
+    wire         give_M_op;
     wire [ 31:0] give_M;
+
+    wire         fwd_rt_data_M_op;
+    wire [ 31:0] fwd_rt_data_M;
 
     //////////////////////////////////////////// W
     wire [ 31:0] pc_W;
@@ -108,13 +119,13 @@ module mips (
 
     wire [ 31:0] dm_out_W;
 
-    wire         reg_write_W;  //GRFÐ´»Ø
+    wire         reg_write_W;  //GRFå†™å›ž
     wire [  2:0] reg_data_op_W;
     wire [ 31:0] reg_data_W;
     wire [  4:0] reg_addr_W;
 
-    wire [ 31:0] give_W;
     wire [  2:0] give_W_op;
+    wire [ 31:0] give_W;
 
     /************   stage_F    ************/
     PC u_PC (
@@ -124,7 +135,7 @@ module mips (
         .next_pc_op(next_pc_op_F),
         .stall     (stall),
 
-        .rs_data_D  (fwd_rs_data_D),  //NPCÊµ¼ÊÉÏÔÚDÖÐ
+        .rs_data_D  (fwd_rs_data_D),  //NPCå®žé™…ä¸Šåœ¨Dä¸­
         .rt_data_D  (fwd_rt_data_D),
         .imm_D      (imm_D),
         .j_address_D(j_address_D),
@@ -146,13 +157,15 @@ module mips (
         .in_pc   (pc_F),
         .in_instr(instr_F),
 
+        .stall(stall),
+
         .out_pc   (pc_D),
         .out_instr(instr_D)
     );
 
-
     MUX_4 u_MUX_4_fwd_rs_data_D (
         .sel  (fwd_rs_data_D_op),
+        .data3(give_E),
         .data2(give_M),
         .data1(give_W),
         .data0(rs_data_D),
@@ -162,6 +175,7 @@ module mips (
 
     MUX_4 u_MUX_4_fwd_rt_data_D (
         .sel  (fwd_rt_data_D_op),
+        .data3(give_E),
         .data2(give_M),
         .data1(give_W),
         .data0(rt_data_D),
@@ -185,11 +199,17 @@ module mips (
 
         .reg_addr_E(reg_addr_E),
         .reg_addr_M(reg_addr_M),
+        .reg_addr_W(reg_addr_W),
 
         .Tnew_E(Tnew_E),
         .Tnew_M(Tnew_M),
         .Tnew  (Tnew),
-        .stall (stall)
+
+        .stall(stall),
+
+        .fwd_rs_data_D_op(fwd_rs_data_D_op),
+        .fwd_rt_data_D_op(fwd_rt_data_D_op)
+
     );
 
     GRF u_GRF (
@@ -197,13 +217,13 @@ module mips (
         .clk  (clk),
         .pc   (pc_W),
 
-        //stage_D¶ÁÈ¡
+        //stage_Dè¯»å–
         .rs     (rs_D),
         .rt     (rt_D),
         .rs_data(rs_data_D),
         .rt_data(rt_data_D),
 
-        //stage_WÐ´»Ø
+        //stage_Wå†™å›ž
         .reg_write(reg_write_W),
         .reg_data (reg_data_W),
         .reg_addr (reg_addr_W)
@@ -239,6 +259,26 @@ module mips (
         .out_Tnew   (Tnew_E)
     );
 
+    assign give_E = pc_E + 32'd8;
+
+    MUX_4 u_MUX_4_fwd_rs_data_E (
+        .sel  (fwd_rs_data_E_op),
+        .data2(give_M),
+        .data1(give_W),
+        .data0(rs_data_E),
+
+        .ans(fwd_rs_data_E)
+    );
+
+    MUX_4 u_MUX_4_fwd_rt_data_E (
+        .sel  (fwd_rt_data_E_op),
+        .data2(give_M),
+        .data1(give_W),
+        .data0(rt_data_E),
+
+        .ans(fwd_rt_data_E)
+    );
+
     CU_E u_CU_E (
         .instr(instr_E),
 
@@ -249,15 +289,21 @@ module mips (
         .imm      (imm_E),
         .j_address(j_address_E),
 
-        .alu_b_op(alu_b_op_E),
-        .alu_op  (alu_op_E),
+        .alu_op(alu_op_E),
 
-        .reg_addr(reg_addr_E)
+        .reg_addr(reg_addr_E),
+
+        .reg_addr_M(reg_addr_M),
+        .reg_addr_W(reg_addr_W),
+
+        .Tnew_M          (Tnew_M),
+        .fwd_rs_data_E_op(fwd_rs_data_E_op),
+        .fwd_rt_data_E_op(fwd_rt_data_E_op)
     );
 
     ALU u_ALU (
-        .rs    (rs_data_E),
-        .rt    (rt_data_E),
+        .rs    (fwd_rs_data_E),
+        .rt    (fwd_rt_data_E),
         .ext   (ext_E),
         .alu_op(alu_op_E),
 
@@ -271,8 +317,8 @@ module mips (
 
         .in_pc     (pc_E),
         .in_instr  (instr_E),
-        .in_rs_data(rs_data_E),
-        .in_rt_data(rt_data_E),
+        .in_rs_data(fwd_rs_data_E),
+        .in_rt_data(fwd_rt_data_E),
         .in_ext    (ext_E),
         .in_alu_out(alu_out_E),
         .in_Tnew   (Tnew_E - 2'b1 > 0 ? Tnew_E - 2'b1 : 2'b0),
@@ -283,10 +329,12 @@ module mips (
         .out_rt_data(rt_data_M),
         .out_ext    (ext_M),
         .out_alu_out(alu_out_M),
-        .out_Tnew   (Tnew_M),
+        .out_Tnew   (Tnew_M)
     );
 
-    assign give_M = alu_out_M;
+    assign give_M        = (give_M_op == 1'b1) ? alu_out_M : pc_M + 8;
+
+    assign fwd_rt_data_M = fwd_rt_data_M_op == 1'd1 ? give_W : rt_data_M;
 
     CU_M u_CU_M (
         .instr(instr_M),
@@ -299,7 +347,12 @@ module mips (
         .j_address(j_address_M),
         .mem_write(mem_write_M),
 
-        .reg_addr(reg_addr_M)
+        .reg_addr(reg_addr_M),
+
+        .fwd_rt_data_M_op(fwd_rt_data_M_op),
+        .reg_addr_W      (reg_addr_W),
+
+        .give_M_op(give_M_op)
     );
 
     DM u_DM (
@@ -338,10 +391,9 @@ module mips (
 
     MUX_8 u_MUX_8_give_W (
         .sel  (give_W_op),
-        .data0(alu_out_W),
-        .data1(dm_out_W),
-        .data2(pc_W + 32'd8),
-        .data3(32'b0),
+        .data2(dm_out_W),
+        .data1(alu_out_W),
+        .data0(pc_W + 32'd8),
 
         .ans(give_W)
     );
@@ -363,13 +415,12 @@ module mips (
         .give_W_op(give_W_op)
     );
 
-    MUX_8 u_MUX_8_GRF_reg_data (  // MUX_8 GRFµÄreg_dataÑ¡Ôñ 
+    MUX_8 u_MUX_8_GRF_reg_data (  // MUX_8 GRFçš„reg_dataé€‰æ‹© 
         .sel(reg_data_op_W),
 
         .data0(alu_out_W),
         .data1(dm_out_W),
         .data2(pc_W + 32'd8),
-        .data3(),
 
         .ans(reg_data_W)
     );

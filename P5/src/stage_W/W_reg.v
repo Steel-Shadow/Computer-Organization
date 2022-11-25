@@ -18,39 +18,39 @@ module w_reg (
     output [31:0] out_alu_out,
     output [31:0] out_dm_out
 );
-    reg [31:0] pc_M;
-    reg [31:0] instr_M;
-    reg [31:0] rs_data_M;
-    reg [31:0] rt_data_M;
-    reg [31:0] ext_M;
-    reg [31:0] alu_out_M;
-    reg [31:0] dm_out_M;
+    reg [31:0] pc_W;
+    reg [31:0] instr_W;
+    reg [31:0] rs_data_W;
+    reg [31:0] rt_data_W;
+    reg [31:0] ext_W;
+    reg [31:0] alu_out_W;
+    reg [31:0] dm_out_W;
 
-    assign out_pc      = pc_M;
-    assign out_instr   = instr_M;
-    assign out_rs_data   = rs_data_M;
-    assign out_rt_data   = rt_data_M;
-    assign out_ext     = ext_M;
-    assign out_alu_out = alu_out_M;
-    assign out_dm_out  = dm_out_M;
+    assign out_pc      = pc_W;
+    assign out_instr   = instr_W;
+    assign out_rs_data   = rs_data_W;
+    assign out_rt_data   = rt_data_W;
+    assign out_ext     = ext_W;
+    assign out_alu_out = alu_out_W;
+    assign out_dm_out  = dm_out_W;
 
     always @(posedge clk, posedge reset) begin
         if (reset) begin
-            pc_M      <= 32'h3000;
-            instr_M   <= 32'b0;
-            rs_data_M   <= 32'b0;
-            rt_data_M   <= 32'b0;
-            ext_M     <= 32'b0;
-            alu_out_M <= 32'b0;
-            dm_out_M  <= 32'b0;
+            pc_W      <= 32'h3000;
+            instr_W   <= 32'b0;
+            rs_data_W   <= 32'b0;
+            rt_data_W   <= 32'b0;
+            ext_W     <= 32'b0;
+            alu_out_W <= 32'b0;
+            dm_out_W  <= 32'b0;
         end else begin
-            pc_M      <= in_pc;
-            instr_M   <= in_instr;
-            rs_data_M   <= in_rs_data;
-            rt_data_M   <= in_rt_data;
-            ext_M     <= in_ext;
-            alu_out_M <= in_alu_out;
-            dm_out_M  <= in_dm_out;
+            pc_W      <= in_pc;
+            instr_W   <= in_instr;
+            rs_data_W   <= in_rs_data;
+            rt_data_W   <= in_rt_data;
+            ext_W     <= in_ext;
+            alu_out_W <= in_alu_out;
+            dm_out_W  <= in_dm_out;
         end
     end
 

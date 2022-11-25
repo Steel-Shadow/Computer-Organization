@@ -11,16 +11,18 @@ module CU_D (
     output reg [2:0] next_pc_op,  //PC
     output reg [2:0] ext_op,      //EXT
 
-    input [4:0] reg_addr_E,  //´¦Àí³åÍ»
+    input [4:0] reg_addr_E,  //å¤„ç†å†²çª
     input [4:0] reg_addr_M,
+    input [4:0] reg_addr_W,
 
     input      [1:0] Tnew_E,
     input      [1:0] Tnew_M,
     output reg [1:0] Tnew,
 
     output reg stall,
-                                    // output reg fwd_rs_data_D_op
-                                    // output reg fwd_rt_data_D_op
+
+    output reg [1:0] fwd_rs_data_D_op,
+    output reg [1:0] fwd_rt_data_D_op
 );
     wire [5:0] op = instr[31:26];
     assign rs    = instr[25:21];
@@ -45,7 +47,7 @@ module CU_D (
     wire lui = op == 6'b001111;
     wire jal = op == 6'b000011;
 
-    //·Ö×éÓÃÓÚTuse Tnew·ÖÎö
+    //åˆ†ç»„ç”¨äºTuse Tnewåˆ†æ
     wire cal_r = (add | sub | sll);
     wire cal_i = (ori | lui);
     wire load = lw;
@@ -58,8 +60,6 @@ module CU_D (
     reg                                       stall_rs_M;
     reg                                       stall_rt_E;
     reg                                       stall_rt_M;
-
-    assign fwd_rs_data_D = (A1_E == A3_M && A1_E != 5'd0 && Tnew_M == 2'b00 && RegWrite_M == 1'b1) ? 2'b10 : (A1_E == A3_W && A1_E != 5'd0 && Tnew_W == 2'b00 && RegWrite_W == 1'b1) ? 2'b01 : 2'b00;
 
     always @(*) begin
         /********* PC *************************/
@@ -74,31 +74,43 @@ module CU_D (
         else if (sll) ext_op = 3'd2;  //zero_ext shamt
         else ext_op = 3'd3;  //0
 
-        ///////////////////////// Ã°ÏÕ´¦ÀíÄ£¿é //////////////////////////////////////
+        ///////////////////////// å†’é™©å¤„ç†æ¨¡å— //////////////////////////////////////
 
         /********* Tuse ************************/
         if (beq | jr) Tuse_rs = 2'd0;
         else if ((cal_r & ~sll) | cal_i | load | store) Tuse_rs = 2'd1;
-        else Tuse_rs = 2'd3;  //Ä¬ÈÏĞ´»Ø»ò²»ÓÃ ËäÈ»sllÎªcal_rµ«²»ÓÃrs
+        else Tuse_rs = 2'd3;  //é»˜è®¤å†™å›æˆ–ä¸ç”¨ è™½ç„¶sllä¸ºcal_rä½†ä¸ç”¨rs
 
         if (beq) Tuse_rt = 2'd0;
         else if (cal_r) Tuse_rt = 2'd1;
         else if (store) Tuse_rt = 2'd2;
-        else Tuse_rt = 2'd3;  //Ä¬ÈÏĞ´»Ø»ò²»ÓÃ
+        else Tuse_rt = 2'd3;  //é»˜è®¤å†™å›æˆ–ä¸ç”¨
 
         /********* Tnew ************************/
-        if (beq | jr) Tnew = 2'd0;  //³õÊ¼²úÉú ²»²úÉúĞÂÊı¾İ
+        if (beq | jr | jal) Tnew = 2'd0;  //åˆå§‹äº§ç”Ÿ ä¸äº§ç”Ÿæ–°æ•°æ®
         else if (cal_r | cal_i) Tnew = 2'd1;
-        else if (load | store | jal) Tnew = 2'd2;
-        else Tnew = 2'd0;  //Ä¬ÈÏ³õÊ¼²úÉú ²»²úÉúĞÂÊı¾İ
+        else if (load | store) Tnew = 2'd2;
+        else Tnew = 2'd0;  //é»˜è®¤åˆå§‹äº§ç”Ÿ ä¸äº§ç”Ÿæ–°æ•°æ®
 
         /********* stall ***********************/
-        stall_rs_E = (Tuse_rs < Tnew_E) & (rs != 5'd0 & rs == reg_addr_E);  //Èô²»¿ÉĞ´Ôòreg_addr=0
+        stall_rs_E = (Tuse_rs < Tnew_E) & (rs != 5'd0 & rs == reg_addr_E);  //è‹¥ä¸å¯å†™åˆ™reg_addr=0
         stall_rs_M = (Tuse_rs < Tnew_M) & (rs != 5'd0 & rs == reg_addr_M);
 
         stall_rt_E = (Tuse_rt < Tnew_E) & (rt != 5'd0 & rt == reg_addr_E);
         stall_rt_M = (Tuse_rt < Tnew_M) & (rt != 5'd0 & rt == reg_addr_M);
 
         stall      = (stall_rs_E | stall_rs_M) | (stall_rt_E | stall_rt_M);
+
+        /********* forward ***********************/
+        if (rs == reg_addr_E & rs != 5'd0 & Tnew_E == 2'b00) fwd_rs_data_D_op = 2'd3;
+        else if (rs == reg_addr_M & rs != 5'd0 & Tnew_M == 2'b00) fwd_rs_data_D_op = 2'd2;
+        else if (rs == reg_addr_W & rs != 5'd0) fwd_rs_data_D_op = 2'd1;
+        else fwd_rs_data_D_op = 2'd0;
+
+        if (rt == reg_addr_E & rt != 5'd0 & Tnew_E == 2'b00) fwd_rt_data_D_op = 2'd3;
+        else if (rt == reg_addr_M & rt != 5'd0 & Tnew_M == 2'b00) fwd_rt_data_D_op = 2'd2;
+        else if (rt == reg_addr_W & rt != 5'd0) fwd_rt_data_D_op = 2'd1;
+        else fwd_rt_data_D_op = 2'd0;
+
     end
 endmodule
