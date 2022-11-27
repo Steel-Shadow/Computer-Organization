@@ -1,4 +1,4 @@
-module w_reg (
+module W_reg (
     input clk,
     input reset,
 
@@ -34,7 +34,7 @@ module w_reg (
     assign out_alu_out = alu_out_W;
     assign out_dm_out  = dm_out_W;
 
-    always @(posedge clk, posedge reset) begin
+    always @(posedge clk) begin
         if (reset) begin
             pc_W      <= 32'h3000;
             instr_W   <= 32'b0;

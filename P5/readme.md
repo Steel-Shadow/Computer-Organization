@@ -1,14 +1,8 @@
 # 五级流水线 CPU 设计方案        
 add, sub, ori, lw, sw, beq, lui, jal, jr, nop
 
-错误记录：  
-fwd_rt_data_E.sel=0  
-fwd_rt_data_E.data0=z 
-    fwd_rt_data_D=z
+## 设计流程   
 
-
-
-设计流程   
 1. 流水线寄存器+单指令功能  
 2. 阻塞实现   
 
@@ -54,19 +48,29 @@ fwd_rt_data_E.data0=z
         |     D     |     E     |     M     |
         | :-------: | :-------: | :-------: |
         | rs_data_D | rs_data_E | rt_data_M |
+        | pc E_reg  | ALU M_reg | DM W_reg  |
         | rt_data_D | rt_data_E |           |
+        | pc E_reg  | ALU M_reg |           |
 
     + 各级供给者流水线寄存器选择转发结果 MUX_1      
 
         add, sub, ori, lw, sw, beq, lui, jal, jr, nop       
-        供给者 jal  pc_W+8
+        供给者  
+        ```verilog
+        assign give_E = pc_E + 32'd8;
+        assign give_M = (give_M_op == 1'b1) ? alu_out_M : pc_M + 8;
+        MUX_8 u_MUX_8_give_W (
+        .sel  (give_W_op),
+        .data2(dm_out_W),
+        .data1(alu_out_W),
+        .data0(pc_W + 32'd8),
+
+        .ans(give_W)
+        );
+        ```
 
     + 需求者流水线寄存器从其后级的接收到的转发结果中选择 MUX_2
-    
-        ori $t0, $0, 2      
-        add $t1, $t0, $t0       
-        nop     
-        sw $t1, 0($0) tuse=2        
+         
    
 5. 测试优化
 
@@ -77,24 +81,33 @@ fwd_rt_data_E.data0=z
 另外，也可以考虑增加模块层次，将每一流水级的各个模块放入一个父级模块中调用，可以将复杂度有效分散到各个层级。
 
 ## stage_F
-PC  
+PC  （涵盖NPC模块）
 IM  
 
 ## stage_D
 D_reg       
+rs rt转发
 CU_D     
-MUX_8(GRF_reg_data)     
-GRF 有 stage_W 写回部分
+GRF 读取部分
 EXT
 
 ## stage_E
 E_reg
+rs rt转发
+give_E
 CU_E
-ALU
+ALU (rs rt ext alu_op)
 
 ## stage_M
+M_reg
+give_M
+CU_M
 DM display 输出`字地址`而非`字节地址`
 ## stage_W
+W_reg
+give_W
+cu_W
+MUX_8_GRF_reg_data
 
 ## CU 概述
 
@@ -115,18 +128,77 @@ PC 的初始地址为 0x00003000，和 Mars 中我们要求设置的代码初始
 # 思考题
 
 1、我们使用提前分支判断的方法尽早产生结果来减少因不确定而带来的开销，但实际上这种方法并非总能提高效率，请从流水线冒险的角度思考其原因并给出一个指令序列的例子。
+    
+    提前判断可能需要阻塞
+```mips
+    ori $t0, $0, 1
+    ori $t1, $0, 2
+    beq $t0, $t1, lable
+    nop
+```
 
 2、因为延迟槽的存在，对于 jal 等需要将指令地址写入寄存器的指令，要写回 PC + 8，请思考为什么这样设计？
 
+    $31内的指令应当是延迟槽内指令的下一条指令，而非延迟槽
+
 3、我们要求大家所有转发数据都来源于流水寄存器而不能是功能部件（如 DM 、 ALU ），请思考为什么？
+
+    这样是单周期的实现，流水线变单周期，效率降低
 
 4、我们为什么要使用 GPR 内部转发？该如何实现？
 
+    W存储和D读取同时进行时，保证D读取到的是W存储的内容。
+
+```verilog
+assign rs_data = (reg_addr == rs & rs != 5'd0) ? reg_data : registers[rs];
+assign rt_data = (reg_addr == rt & rt != 5'd0) ? reg_data : registers[rt];
+```
+
 5、我们转发时数据的需求者和供给者可能来源于哪些位置？共有哪些转发数据通路？
+
+    需求者
+    |     D     |     E     |     M     |
+    | :-------: | :-------: | :-------: |
+    | rs_data_D | rs_data_E | rt_data_M |
+    | rt_data_D | rt_data_E |           |
+
+    供给者
+```verilog
+        assign give_E = pc_E + 32'd8;
+        assign give_M = (give_M_op == 1'b1) ? alu_out_M : pc_M + 8;
+        MUX_8 u_MUX_8_give_W (
+        .sel  (give_W_op),
+        .data2(dm_out_W),
+        .data1(alu_out_W),
+        .data0(pc_W + 32'd8),
+
+        .ans(give_W)
+        );
+```
+    转发数据通路：需求者端口的根据流水线优先级选择fwd_MUX 供给者端口的根据指令选择give_MUX
 
 6、在课上测试时，我们需要你现场实现新的指令，对于这些新的指令，你可能需要在原有的数据通路上做哪些扩展或修改？提示：你可以对指令进行分类，思考每一类指令可能修改或扩展哪些位置。
 
+    add, sub, ori, lw, sw, beq, lui, jal, jr, nop
+
+```verilog
+    wire cal_r = (add | sub | sll);
+    wire cal_i = (ori | lui);
+    wire load = lw;
+    wire store = sw;
+```
+    | cal_r             | 修改alu     |
+    | ----------------- | ----------- |
+    | cal_i             | 修改ext alu |
+    | 寄存器分支 beq    | 修改pc      |
+    | 跳转imm并链接 jal | 修改pc      |
+    | 跳转寄存器 jr     |             |
+
 7、简要描述你的译码器架构，并思考该架构的优势以及不足。
+
+    分布式 信号驱动型 cu_D包含主要冲突处理  
+    优势 逻辑较为清晰
+    不足 分为4个CU 修改dubug复杂
 
 1、[P5 选做] 请详细描述你的测试方案及测试数据构造策略。
 

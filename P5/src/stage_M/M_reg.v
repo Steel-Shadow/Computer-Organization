@@ -34,7 +34,7 @@ module M_reg (
     assign out_alu_out = alu_out_M;
     assign out_Tnew    = Tnew_M;
 
-    always @(posedge clk, posedge reset) begin
+    always @(posedge clk) begin
         if (reset) begin
             pc_M      <= 32'h3000;
             instr_M   <= 32'b0;

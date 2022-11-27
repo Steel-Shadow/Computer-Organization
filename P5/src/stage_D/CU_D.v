@@ -89,7 +89,7 @@ module CU_D (
         /********* Tnew ************************/
         if (beq | jr | jal) Tnew = 2'd0;  //初始产生 不产生新数据
         else if (cal_r | cal_i) Tnew = 2'd1;
-        else if (load | store) Tnew = 2'd2;
+        else if (load) Tnew = 2'd2;
         else Tnew = 2'd0;  //默认初始产生 不产生新数据
 
         /********* stall ***********************/

@@ -9,6 +9,9 @@ templates
 课件
 理论作业
 预习资料
+
+P5/build
+
 # BUAA-CO 测试工具
 
 *._summary
@@ -92,3 +95,4 @@ xlnx_auto_0_xdb/
 xst/
 _ngo/
 _xmsgs/
+

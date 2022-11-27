@@ -32,7 +32,7 @@ module E_reg (
     assign out_ext     = ext_E;
     assign out_Tnew    = Tnew_E;
 
-    always @(posedge clk, posedge reset) begin
+    always @(posedge clk) begin
         if (reset) begin
             pc_E      <= 32'h3000;
             instr_E   <= 32'b0;

@@ -16,13 +16,18 @@ module D_reg (
     assign out_pc    = pc_D;
     assign out_instr = instr_D;
 
-    always @(posedge clk, posedge reset) begin
+    always @(posedge clk) begin
         if (reset) begin
             pc_D    <= 32'h3000;
             instr_D <= 32'b0;
         end else begin
-            pc_D    <= stall ? pc_D : in_pc;
-            instr_D <= stall ? instr_D : in_instr;
+            if (stall) begin
+                pc_D    <= pc_D;
+                instr_D <= instr_D;
+            end else begin
+                pc_D    <= in_pc;
+                instr_D <= in_instr;
+            end
         end
     end
 endmodule

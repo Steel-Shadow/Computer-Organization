@@ -135,7 +135,7 @@ module mips (
         .next_pc_op(next_pc_op_F),
         .stall     (stall),
 
-        .rs_data_D  (fwd_rs_data_D),  //NPC实际上在D中
+        .rs_data_D  (fwd_rs_data_D),  //NPC实际上在D
         .rt_data_D  (fwd_rt_data_D),
         .imm_D      (imm_D),
         .j_address_D(j_address_D),
@@ -321,7 +321,7 @@ module mips (
         .in_rt_data(fwd_rt_data_E),
         .in_ext    (ext_E),
         .in_alu_out(alu_out_E),
-        .in_Tnew   (Tnew_E - 2'b1 > 0 ? Tnew_E - 2'b1 : 2'b0),
+        .in_Tnew   (Tnew_E > 2'b1 ? Tnew_E - 2'b1 : 2'b0),
 
         .out_pc     (pc_M),
         .out_instr  (instr_M),
@@ -334,7 +334,7 @@ module mips (
 
     assign give_M        = (give_M_op == 1'b1) ? alu_out_M : pc_M + 8;
 
-    assign fwd_rt_data_M = fwd_rt_data_M_op == 1'd1 ? give_W : rt_data_M;
+    assign fwd_rt_data_M = (fwd_rt_data_M_op == 1'd1) ? give_W : rt_data_M;
 
     CU_M u_CU_M (
         .instr(instr_M),
@@ -361,21 +361,21 @@ module mips (
         .pc           (pc_M),
         .mem_write    (mem_write_M),
         .mem_addr_byte(alu_out_M[13:0]),
-        .mem_data     (rt_data_M),
+        .mem_data     (fwd_rt_data_M),
 
         .dm_out(dm_out_M)
     );
 
     /************   stage_W    ************/
 
-    w_reg u_w_reg (
+    W_reg u_W_reg (
         .clk  (clk),
         .reset(reset),
 
         .in_pc     (pc_M),
         .in_instr  (instr_M),
         .in_rs_data(rs_data_M),
-        .in_rt_data(rt_data_M),
+        .in_rt_data(fwd_rt_data_M),
         .in_ext    (ext_M),
         .in_alu_out(alu_out_M),
         .in_dm_out (dm_out_M),
@@ -391,9 +391,9 @@ module mips (
 
     MUX_8 u_MUX_8_give_W (
         .sel  (give_W_op),
-        .data2(dm_out_W),
-        .data1(alu_out_W),
         .data0(pc_W + 32'd8),
+        .data1(alu_out_W),
+        .data2(dm_out_W),
 
         .ans(give_W)
     );
