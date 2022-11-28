@@ -2,7 +2,6 @@ module GRF (
     input         reset,
     input         clk,
     input  [31:0] pc,
-    input         reg_write,
     input  [ 4:0] rs,
     input  [ 4:0] rt,
     input  [ 4:0] reg_addr,
@@ -18,8 +17,8 @@ $display("@%h: $%d <= %h", WPC, Waddr, WData);
 */
     reg [31:0] registers[31:0];
 
-    assign rs_data = (reg_write & reg_addr == rs & rs != 5'd0) ? reg_data : registers[rs];
-    assign rt_data = (reg_write & reg_addr == rt & rt != 5'd0) ? reg_data : registers[rt];
+    assign rs_data = (reg_addr == rs & rs != 5'd0) ? reg_data : registers[rs];
+    assign rt_data = (reg_addr == rt & rt != 5'd0) ? reg_data : registers[rt];
 
     integer i;
     always @(posedge clk) begin
@@ -28,7 +27,7 @@ $display("@%h: $%d <= %h", WPC, Waddr, WData);
                 registers[i] <= 0;
             end
         end else begin
-            if (reg_write & (reg_addr != 5'd0)) begin
+            if (reg_addr != 5'd0) begin
                 $display("%d@%h: $%d <= %h", $time, pc, reg_addr, reg_data);
                 // $display("@%h: $%d <= %h", pc, reg_addr, reg_data);
                 registers[reg_addr] <= reg_data;

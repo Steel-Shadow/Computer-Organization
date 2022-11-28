@@ -119,10 +119,9 @@ module mips (
 
     wire [ 31:0] dm_out_W;
 
-    wire         reg_write_W;  //GRF写回
+    wire [  4:0] reg_addr_W;  //GRF写回
     wire [  2:0] reg_data_op_W;
     wire [ 31:0] reg_data_W;
-    wire [  4:0] reg_addr_W;
 
     wire [  2:0] give_W_op;
     wire [ 31:0] give_W;
@@ -223,10 +222,9 @@ module mips (
         .rs_data(rs_data_D),
         .rt_data(rt_data_D),
 
-        //stage_W写回
-        .reg_write(reg_write_W),
-        .reg_data (reg_data_W),
-        .reg_addr (reg_addr_W)
+        //stage_W写回 
+        .reg_data(reg_data_W),
+        .reg_addr(reg_addr_W) //隐含 reg_write
     );
 
     EXT u_EXT (
@@ -408,7 +406,6 @@ module mips (
         .imm      (imm_W),
         .j_address(j_address_W),
 
-        .reg_write  (reg_write_W),
         .reg_addr   (reg_addr_W),
         .reg_data_op(reg_data_op_W),
 

@@ -8,7 +8,7 @@ module CU_E (
     output [ 15:0] imm,
     output [ 25:0] j_address,
 
-    output reg [3:0] alu_op,    //alu
+    output reg [3:0] alu_op,  //alu
 
     output reg [4:0] reg_addr,  //冲突处理
 
@@ -42,19 +42,28 @@ module CU_E (
     wire lui = (op == 6'b001111);
     wire jal = (op == 6'b000011);
 
+    //额外添加指令
+    wire addi = (op == 6'b001000);
+
+    wire cal_r = (add | sub | sll);
+    wire cal_i = (ori | lui | addi);
+    wire load = lw;
+    wire store = sw;
+
     always @(*) begin
-        // + - |
+        //alu_op
         if (add) alu_op = 4'd0;
         else if (sub) alu_op = 4'd1;
         else if (ori) alu_op = 4'd2;
         else if (lw | sw) alu_op = 4'd3;
         else if (lui) alu_op = 4'd4;
         else if (sll) alu_op = 4'd5;
+        else if (addi) alu_op = 4'd6;
         else alu_op = 4'd0;
 
         //reg_addr 
-        if (add | sub | sll) reg_addr = rd;  //rd
-        else if (lw | lui | ori) reg_addr = rt;  //rt
+        if (cal_r) reg_addr = rd;  //rd
+        else if (load | cal_i) reg_addr = rt;  //rt
         else if (jal) reg_addr = 5'd31;  //$ra $31
         else reg_addr = 5'd0;  //$0
 

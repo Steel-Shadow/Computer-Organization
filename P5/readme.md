@@ -1,5 +1,23 @@
 # 五级流水线 CPU 设计方案        
-add, sub, ori, lw, sw, beq, lui, jal, jr, nop
+
+add, sub, ori, lw, sw, beq, lui, jal, jr, nop  
+addi  
+
+删除了 reg_write 若reg_addr==0 则不写入
+
+## 指令添加流程
+
+必须确保 CU_D CU_E CU_M CU_W 都完成了指令译码！！！  
+本人 CU 缺陷所在，多次复制同样代码  P6重构？ 
+
+1. CU_D
+   + 指令译码
+   + next_pc_op
+   + ext_op
+   + Tnew Tuse_rs Tuse_rt 分析 
+   + stall fwd 处理
+
+2.  
 
 ## 设计流程   
 
@@ -58,7 +76,9 @@ add, sub, ori, lw, sw, beq, lui, jal, jr, nop
         供给者  
         ```verilog
         assign give_E = pc_E + 32'd8;
+
         assign give_M = (give_M_op == 1'b1) ? alu_out_M : pc_M + 8;
+        
         MUX_8 u_MUX_8_give_W (
         .sel  (give_W_op),
         .data2(dm_out_W),
@@ -89,7 +109,7 @@ D_reg
 rs rt转发
 CU_D     
 GRF 读取部分
-EXT
+EXT 默认符号扩展imm
 
 ## stage_E
 E_reg

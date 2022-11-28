@@ -10,7 +10,7 @@
          </top_modules>
       </db_ref>
    </db_ref_list>
-   <WVObjectSize size="22" />
+   <WVObjectSize size="23" />
    <wave_markers>
       <marker time="200000000" label="" />
    </wave_markers>
@@ -67,6 +67,10 @@
       <obj_property name="DisplayName">label</obj_property>
       <obj_property name="BkColor">128 128 255</obj_property>
       <obj_property name="TextColor">230 230 230</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_mips/u_mips/u_E_reg/stall" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">stall</obj_property>
+      <obj_property name="ObjectShortName">stall</obj_property>
    </wvobject>
    <wvobject fp_name="/tb_mips/u_mips/u_E_reg/pc_E" type="array" db_ref_id="1">
       <obj_property name="DisplayName">label</obj_property>

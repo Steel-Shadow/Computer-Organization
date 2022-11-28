@@ -40,9 +40,11 @@ module CU_M (
     wire lui = (op == 6'b001111);
     wire jal = (op == 6'b000011);
 
-    //分组用于转发分析
+    //额外添加指令
+    wire addi = (op == 6'b001000);
+
     wire cal_r = (add | sub | sll);
-    wire cal_i = (ori | lui);
+    wire cal_i = (ori | lui | addi);
     wire load = lw;
     wire store = sw;
 
@@ -52,9 +54,9 @@ module CU_M (
         if (jal) give_M_op = 1'd0;
         else give_M_op = 1'd1;
 
-        //reg_addr 判断冒险
-        if (add | sub | sll) reg_addr = rd;  //rd
-        else if (lw | lui | ori) reg_addr = rt;  //rt
+        //reg_addr 
+        if (cal_r) reg_addr = rd;  //rd
+        else if (load | cal_i) reg_addr = rt;  //rt
         else if (jal) reg_addr = 5'd31;  //$ra $31
         else reg_addr = 5'd0;  //$0
 

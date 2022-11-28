@@ -40,16 +40,19 @@ module CU_D (
     wire jr = R & (func == 6'b001000);
     wire sll = R & (func == 6'b000000);
 
-    wire ori = op == 6'b001101;
-    wire lw = op == 6'b100011;
-    wire sw = op == 6'b101011;
-    wire beq = op == 6'b000100;
-    wire lui = op == 6'b001111;
-    wire jal = op == 6'b000011;
+    wire ori = (op == 6'b001101);
+    wire lw = (op == 6'b100011);
+    wire sw = (op == 6'b101011);
+    wire beq = (op == 6'b000100);
+    wire lui = (op == 6'b001111);
+    wire jal = (op == 6'b000011);
+
+    //额外添加指令
+    wire addi = (op == 6'b001000);
 
     //分组用于Tuse Tnew分析
     wire cal_r = (add | sub | sll);
-    wire cal_i = (ori | lui);
+    wire cal_i = (ori | lui | addi);
     wire load = lw;
     wire store = sw;
 
@@ -69,10 +72,10 @@ module CU_D (
         else next_pc_op = 3'd0;
 
         /********* EXT *************************/
-        if (lw | sw) ext_op = 3'd0;  //sign_ext imm
+        if (lw | sw | addi) ext_op = 3'd0;  //sign_ext imm
         else if (ori | lui) ext_op = 3'd1;  //zero_ext imm
         else if (sll) ext_op = 3'd2;  //zero_ext shamt
-        else ext_op = 3'd3;  //0
+        else ext_op = 3'd3;  //0 默认符号扩展imm
 
         ///////////////////////// 冒险处理模块 //////////////////////////////////////
 
