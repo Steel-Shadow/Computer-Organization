@@ -10,16 +10,12 @@ module PC (
     input [15:0] imm_D,
     input [25:0] j_address_D,
 
-    output     [31:0] pc_out,
-    output reg        huiwen
+    output [31:0] pc_out
 );
     reg [31:0] pc;  //pc_F
     reg [31:0] next_pc;
 
     assign pc_out = pc;
-
-    integer i;
-    reg     flag;
 
     always @(*) begin
         if (stall) next_pc = pc;
@@ -31,19 +27,8 @@ module PC (
                 next_pc = {pc[31:28], j_address_D, 2'b00};
                 3'd3:  //jr PC <- GPR[rs]
                 next_pc = rs_data_D;
-                3'd4: begin
-                    flag = 1;
-                    for (i = 0; i < 16; i = i + 1) begin
-                        if (rs_data_D[i] != rs_data_D[5'd31-i]) begin
-                            flag = 0;
-                        end else flag = flag;
-                    end
-
-                    if (flag == 1'b0) begin
-                        next_pc = pc + 32'd4;
-                    end else next_pc = pc + {{14{imm_D[15]}}, imm_D, 2'b00};
-                    huiwen = flag;
-                end
+                3'd4:  //bne
+                next_pc = (rs_data_D != rt_data_D) ? pc + {{14{imm_D[15]}}, imm_D, 2'b00} : pc + 32'd4;
                 default: next_pc = pc + 32'd4;
             endcase
         end

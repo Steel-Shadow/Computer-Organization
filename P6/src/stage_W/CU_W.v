@@ -11,11 +11,7 @@ module CU_W (
     output reg [4:0] reg_addr,
     output reg [2:0] reg_data_op,
 
-    output reg [2:0] give_W_op,
-
-    output lwtbi,
-
-    input huiwen
+    output reg [2:0] give_W_op
 );
     wire [5:0] op = instr[31:26];
     assign rs    = instr[25:21];
@@ -39,36 +35,43 @@ module CU_W (
     wire beq = (op == 6'b000100);
     wire lui = (op == 6'b001111);
     wire jal = (op == 6'b000011);
-    wire bpnal = (op == 6'b101100);
 
-    //额外添加指令
-    wire addi = op == 6'b001000;
-    assign lwtbi = (op == 6'b111000);
-    wire swc = (op == 6'b101010) & (func == 6'b101110);
+    //P6额外添加指令
+    wire instr_and = R & (func == 6'b100100);
+    wire instr_or = R & (func == 6'b100101);
+    wire slt = R & (func == 6'b101010);
+    wire sltu = R & (func == 6'b101011);
 
-    wire cal_r = (add | sub | sll | swc);
-    wire cal_i = (ori | lui | addi);
-    wire load = lw;
-    wire store = sw;
+    wire andi = (op == 6'b001100);
+    wire addi = (op == 6'b001000);
+    wire lb = (op == 6'b100000);
+    wire lh = (op == 6'b100001);
+    wire sb = (op == 6'b101000);
+    wire sh = (op == 6'b101001);
+
+    wire bne = (op == 6'b000101);
+
+    wire cal_r = (add | sub | sll | instr_and | instr_or | slt | sltu);
+    wire cal_i = (ori | lui | addi | andi);
+    wire load = (lw | lb | lh);
+    wire store = (sw | sb | sh);
 
     always @(*) begin
-
         //reg_addr
         if (cal_r) reg_addr = rd;  //rd
         else if (load | cal_i) reg_addr = rt;  //rt
-        else if (jal | (bpnal & huiwen)) reg_addr = 5'd31;  //$ra $31
-        else if (lwtbi) reg_addr = 5'd31;  //$ra $31
+        else if (jal) reg_addr = 5'd31;  //$ra $31
         else reg_addr = 5'd0;  //$0
 
         //reg_data_op
-        if (load | lwtbi) reg_data_op = 3'd1;  //dm_out
-        else if (jal | (bpnal & huiwen)) reg_data_op = 3'd2;  //pc_W+8
+        if (load) reg_data_op = 3'd1;  //dm_out
+        else if (jal) reg_data_op = 3'd2;  //pc_W+8
         else reg_data_op = 3'd0;  //alu_out
 
         //give_W_op
-        if (jal | (bpnal & huiwen)) give_W_op = 3'd0;  //pc_W+8
+        if (jal) give_W_op = 3'd0;  //pc_W+8
         else if (cal_r | cal_i) give_W_op = 3'd1;  //alu_out_W
-        else if (load | lwtbi) give_W_op = 3'd2;  //dm_out_W
+        else if (load) give_W_op = 3'd2;  //dm_out_W
         else give_W_op = 3'd0;  //else
     end
 endmodule

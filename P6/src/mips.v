@@ -1,11 +1,25 @@
 module mips (
     input clk,
-    input reset
+    input reset,
+
+    input  [31:0] i_inst_rdata,  //	I	i_inst_addr 对应的 32 位指令
+    output [31:0] i_inst_addr,   //	O	需要进行取指操作的流水级 PC（一般为 F 级）
+
+    input  [31:0] m_data_rdata,   // I	数据存储器存储的相应数据
+    output [31:0] m_data_addr,    // O	待写入/读出的数据存储器相应地址
+    output [31:0] m_data_wdata,   // O	待写入数据存储器相应数据
+    output [ 3:0] m_data_byteen,  // O	四位字节使能
+    output [31:0] m_inst_addr,    // O	M 级 PC
+
+    output        w_grf_we,
+    output [ 4:0] w_grf_addr,
+    output [31:0] w_grf_wdata,
+    output [31:0] w_inst_addr
 );
     /************   declaration    ************/
     //////////////////////////////////////////// F
-    wire [ 31:0] pc_F;
     wire [ 31:0] instr_F;
+    wire [ 31:0] pc_F;
     wire [25:21] rs_F;
     wire [20:16] rt_F;
     wire [15:11] rd_F;
@@ -14,10 +28,6 @@ module mips (
     wire [ 25:0] j_address_F;
 
     wire [  2:0] next_pc_op_F;
-
-    wire         lwtbi_E;
-    wire         lwtbi_M;
-    wire         lwtbi_W;
 
     //////////////////////////////////////////// D
     wire [ 31:0] pc_D;
@@ -92,7 +102,8 @@ module mips (
 
     wire [ 31:0] alu_out_M;
 
-    wire         mem_write_M;  //DM
+    //DM
+    wire [  2:0] dm_op_M;
     wire [ 31:0] dm_out_M;
 
     wire [  1:0] Tnew_M;
@@ -130,9 +141,10 @@ module mips (
     wire [  2:0] give_W_op;
     wire [ 31:0] give_W;
 
-    wire         huiwen;
-
     /************   stage_F    ************/
+    assign i_inst_addr = pc_F;
+    assign instr_F     = i_inst_rdata;
+
     PC u_PC (
         .clk  (clk),
         .reset(reset),
@@ -145,17 +157,9 @@ module mips (
         .imm_D      (imm_D),
         .j_address_D(j_address_D),
 
-        .pc_out(pc_F),
-        .huiwen(huiwen)
+        .pc_out(pc_F)
     );
 
-    IM u_IM (
-        .pc(pc_F),
-
-        .instr(instr_F)
-    );
-
-    wire huiwen_D;
     /************   stage_D    ************/
     D_reg u_D_reg (
         .clk  (clk),
@@ -167,10 +171,7 @@ module mips (
         .stall(stall),
 
         .out_pc   (pc_D),
-        .out_instr(instr_D),
-
-        .in_huiwen (huiwen),
-        .out_huiwen(huiwen_D)
+        .out_instr(instr_D)
     );
 
     MUX_4 u_MUX_4_fwd_rs_data_D (
@@ -218,11 +219,7 @@ module mips (
         .stall(stall),
 
         .fwd_rs_data_D_op(fwd_rs_data_D_op),
-        .fwd_rt_data_D_op(fwd_rt_data_D_op),
-
-        .lwtbi_E(lwtbi_E),
-        .lwtbi_M(lwtbi_M),
-        .lwtbi_W(lwtbi_W)
+        .fwd_rt_data_D_op(fwd_rt_data_D_op)
 
     );
 
@@ -239,8 +236,13 @@ module mips (
 
         //stage_W写回 
         .reg_data(reg_data_W),
-        .reg_addr(lwtbi_W ? (dm_out_W[31:27] > rt_W ? dm_out_W[31:27] : rt_W) : reg_addr_W)
+        .reg_addr(reg_addr_W)   //隐含 reg_write
     );
+
+    assign w_grf_we    = 1'b1;
+    assign w_grf_addr  = reg_addr_W;
+    assign w_grf_wdata = reg_data_W;
+    assign w_inst_addr = pc_W;
 
     EXT u_EXT (
         .ext_op(ext_op_D),
@@ -250,7 +252,6 @@ module mips (
         .ext(ext_D)
     );
 
-    wire huiwen_E;
     /************   stage_E    ************/
     E_reg u_E_reg (
         .clk  (clk),
@@ -270,10 +271,7 @@ module mips (
         .out_rs_data(rs_data_E),
         .out_rt_data(rt_data_E),
         .out_ext    (ext_E),
-        .out_Tnew   (Tnew_E),
-
-        .in_huiwen (huiwen_D),
-        .out_huiwen(huiwen_E)
+        .out_Tnew   (Tnew_E)
     );
 
     assign give_E = pc_E + 32'd8;
@@ -315,11 +313,7 @@ module mips (
 
         .Tnew_M          (Tnew_M),
         .fwd_rs_data_E_op(fwd_rs_data_E_op),
-        .fwd_rt_data_E_op(fwd_rt_data_E_op),
-
-        .lwtbi(lwtbi_E),
-
-        .huiwen(huiwen_E)
+        .fwd_rt_data_E_op(fwd_rt_data_E_op)
     );
 
     ALU u_ALU (
@@ -331,7 +325,6 @@ module mips (
         .alu_out(alu_out_E)
     );
 
-    wire huiwen_M;
     /************   stage_M    ************/
     M_reg u_M_reg (
         .clk  (clk),
@@ -351,10 +344,7 @@ module mips (
         .out_rt_data(rt_data_M),
         .out_ext    (ext_M),
         .out_alu_out(alu_out_M),
-        .out_Tnew   (Tnew_M),
-
-        .in_huiwen (huiwen_E),
-        .out_huiwen(huiwen_M)
+        .out_Tnew   (Tnew_M)
     );
 
     assign give_M        = (give_M_op == 1'b1) ? alu_out_M : pc_M + 8;
@@ -370,33 +360,34 @@ module mips (
         .shamt    (shamt_M),
         .imm      (imm_M),
         .j_address(j_address_M),
-        .mem_write(mem_write_M),
+
+        .mem_addr     (alu_out_M),
+        .fwd_rt_data  (fwd_rt_data_M),  //待处理的写入数据
+        .m_data_byteen(m_data_byteen),  //四位字节使能 写入字节选择
+        .dm_op        (dm_op_M),
+        .m_data_wdata (m_data_wdata),   //DM 写入数据
 
         .reg_addr(reg_addr_M),
 
         .fwd_rt_data_M_op(fwd_rt_data_M_op),
         .reg_addr_W      (reg_addr_W),
 
-        .give_M_op(give_M_op),
-
-        .lwtbi(lwtbi_M),
-
-        .huiwen(huiwen_M)
+        .give_M_op(give_M_op)
     );
 
-    DM u_DM (
-        .clk          (clk),
-        .reset        (reset),
-        .pc           (pc_M),
-        .mem_write    (mem_write_M),
-        .mem_addr_byte(alu_out_M[13:0]),
-        .mem_data     (fwd_rt_data_M),
+    assign m_data_addr = alu_out_M;  //DM
+    assign m_inst_addr = pc_M;
+
+    BE u_BE (
+        .mem_addr(alu_out_M[1:0]),
+        .mem_data(m_data_rdata),
+        .dm_op   (dm_op_M),
 
         .dm_out(dm_out_M)
     );
 
     /************   stage_W    ************/
-    wire huiwen_W;
+
     W_reg u_W_reg (
         .clk  (clk),
         .reset(reset),
@@ -415,10 +406,7 @@ module mips (
         .out_rt_data(rt_data_W),
         .out_ext    (ext_W),
         .out_alu_out(alu_out_W),
-        .out_dm_out (dm_out_W),
-
-        .in_huiwen (huiwen_M),
-        .out_huiwen(huiwen_W)
+        .out_dm_out (dm_out_W)
     );
 
     MUX_8 u_MUX_8_give_W (
@@ -443,11 +431,7 @@ module mips (
         .reg_addr   (reg_addr_W),
         .reg_data_op(reg_data_op_W),
 
-        .give_W_op(give_W_op),
-
-        .lwtbi(lwtbi_W),
-
-        .in_huiwen(huiwen_W)
+        .give_W_op(give_W_op)
     );
 
     MUX_8 u_MUX_8_GRF_reg_data (  // MUX_8 GRF的reg_data选择 

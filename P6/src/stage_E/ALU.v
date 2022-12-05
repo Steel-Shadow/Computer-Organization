@@ -6,7 +6,6 @@ module ALU (
     output [31:0] alu_out
 );
     reg [31:0] ans;
-    reg [ 4:0] temp;
 
     assign alu_out = ans;
 
@@ -19,19 +18,11 @@ module ALU (
             4'd4: ans = ext << 5'd16;  //lui
             4'd5: ans = rt << ext;  //sll
             4'd6: ans = rs + ext;  //addi
-            4'd7: ans = (rs + ext) << 2;  //可能出错的alu
-            4'd8: begin
-                temp = rt[4:0];
-
-                if (rt[0] == 1'b0) begin
-                    //GPR[rd] ← GPR[rs](s-1)...0 || GPR[rs]31...s
-                    ans = (rs << (32 - temp)) | (rs >> temp);
-                end else begin
-                    //GPR[rd] ← GPR[rs](31-s)...0 || GPR[rs]31...(32-s)
-                    ans = (rs >> (32 - temp)) | (rs << temp);
-                end
-
-            end
+            4'd7: ans = rs & rt;  //and
+            4'd8: ans = rs | rt;  //or
+            4'd9: ans = ($signed(rs) < $signed(rt)) ? 1 : 0;  //slt
+            4'd10: ans = rs < rt ? 1 : 0;  //sltu
+            4'd11: ans = rs & ext;  //andi
             default: ans = 0;
         endcase
 
