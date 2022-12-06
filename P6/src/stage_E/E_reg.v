@@ -16,10 +16,7 @@ module E_reg (
     output [31:0] out_rs_data,
     output [31:0] out_rt_data,
     output [31:0] out_ext,
-    output [ 1:0] out_Tnew,
-
-    input  in_flag,
-    output out_flag
+    output [ 1:0] out_Tnew
 );
     reg [31:0] pc_E;
     reg [31:0] instr_E;
@@ -27,7 +24,6 @@ module E_reg (
     reg [31:0] rt_data_E;
     reg [31:0] ext_E;
     reg [ 1:0] Tnew_E;
-    reg        flag_E;
 
     assign out_pc      = pc_E;
     assign out_instr   = instr_E;
@@ -35,7 +31,6 @@ module E_reg (
     assign out_rt_data = rt_data_E;
     assign out_ext     = ext_E;
     assign out_Tnew    = Tnew_E;
-    assign out_flag    = flag_E;
 
     always @(posedge clk) begin
         if (reset) begin
@@ -45,7 +40,6 @@ module E_reg (
             rt_data_E <= 32'b0;
             ext_E     <= 32'b0;
             Tnew_E    <= 2'b0;
-            flag_E    <= 1'b0;
         end else begin
             pc_E      <= stall ? 32'h3000 : in_pc;
             instr_E   <= stall ? 32'b0 : in_instr;
@@ -53,7 +47,6 @@ module E_reg (
             rt_data_E <= stall ? 32'b0 : in_rt_data;
             ext_E     <= stall ? 32'b0 : in_ext;
             Tnew_E    <= stall ? 2'b0 : in_Tnew;
-            flag_E    <= stall ? 1'b0 : in_flag;
         end
     end
 endmodule

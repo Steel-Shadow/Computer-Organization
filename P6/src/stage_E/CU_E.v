@@ -17,10 +17,7 @@ module CU_E (
     input [1:0] Tnew_M,
 
     output reg [1:0] fwd_rs_data_E_op,
-    output reg [1:0] fwd_rt_data_E_op,
-
-    output lwie,
-    input  flag
+    output reg [1:0] fwd_rt_data_E_op
 );
     wire [5:0] op = instr[31:26];
     assign rs    = instr[25:21];
@@ -45,33 +42,47 @@ module CU_E (
     wire lui = (op == 6'b001111);
     wire jal = (op == 6'b000011);
 
-    //额外添加指令
-    wire addi = (op == 6'b001000);
-    assign lwie = (op == 6'b111001);
-    wire addei = (op == 6'b110011);
-    wire bioal = (op == 6'b101101);
+    //P6额外添加指令
+    wire instr_and = R & (func == 6'b100100);
+    wire instr_or = R & (func == 6'b100101);
+    wire slt = R & (func == 6'b101010);
+    wire sltu = R & (func == 6'b101011);
 
-    wire cal_r = (add | sub | sll);
-    wire cal_i = (ori | lui | addi | addei);
-    wire load = (lw | lwie);
-    wire store = sw;
+    wire andi = (op == 6'b001100);
+    wire addi = (op == 6'b001000);
+    wire lb = (op == 6'b100000);
+    wire lh = (op == 6'b100001);
+    wire sb = (op == 6'b101000);
+    wire sh = (op == 6'b101001);
+
+    wire bne = (op == 6'b000101);
+
+    //分类
+    wire cal_r = (add | sub | sll | instr_and | instr_or | slt | sltu);
+    wire cal_i = (ori | lui | addi | andi);
+    wire load = (lw | lb | lh);
+    wire store = (sw | sb | sh);
 
     always @(*) begin
         //alu_op
         if (add) alu_op = 4'd0;
         else if (sub) alu_op = 4'd1;
         else if (ori) alu_op = 4'd2;
-        else if (load | sw) alu_op = 4'd3;
+        else if (load | store) alu_op = 4'd3;
         else if (lui) alu_op = 4'd4;
         else if (sll) alu_op = 4'd5;
         else if (addi) alu_op = 4'd6;
-        else if (addei) alu_op = 4'd7;
+        else if (instr_and) alu_op = 4'd7;
+        else if (instr_or) alu_op = 4'd8;
+        else if (slt) alu_op = 4'd9;
+        else if (sltu) alu_op = 4'd10;
+        else if (andi) alu_op = 4'd11;
         else alu_op = 4'd0;
 
         //reg_addr 
         if (cal_r) reg_addr = rd;  //rd
         else if (load | cal_i) reg_addr = rt;  //rt
-        else if (jal | (bioal && flag)) reg_addr = 5'd31;  //$ra $31
+        else if (jal) reg_addr = 5'd31;  //$ra $31
         else reg_addr = 5'd0;  //$0
 
         /********* forward ***********************/

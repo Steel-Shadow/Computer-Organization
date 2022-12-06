@@ -9,10 +9,6 @@ module ALU (
 
     assign alu_out = ans;
 
-    wire [32:0] ext_33 = {1'b1, ext};
-    wire [32:0] rs_33 = {rs[31], rs};
-    wire [32:0] temp = ext_33 + rs_33;
-
     always @(*) begin
         case (alu_op)
             4'd0: ans = rs + rt;  //add
@@ -22,10 +18,11 @@ module ALU (
             4'd4: ans = ext << 5'd16;  //lui
             4'd5: ans = rt << ext;  //sll
             4'd6: ans = rs + ext;  //addi
-            4'd7: begin
-                if (temp[32] != temp[31]) ans = ext;
-                else ans = temp;
-            end
+            4'd7: ans = rs & rt;  //and
+            4'd8: ans = rs | rt;  //or
+            4'd9: ans = ($signed(rs) < $signed(rt)) ? 1 : 0;  //slt
+            4'd10: ans = rs < rt ? 1 : 0;  //sltu
+            4'd11: ans = rs & ext;  //andi
             default: ans = 0;
         endcase
 
