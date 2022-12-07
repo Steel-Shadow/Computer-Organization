@@ -34,6 +34,8 @@ module W_reg (
     assign out_instr   = instr_W;
     assign out_rs_data = rs_data_W;
     assign out_rt_data = rt_data_W;
+    assign out_rs_data = rs_data_W;
+    assign out_rt_data = rt_data_W;
     assign out_ext     = ext_W;
     assign out_alu_out = alu_out_W;
     assign out_dm_out  = dm_out_W;
@@ -45,6 +47,8 @@ module W_reg (
             instr_W   <= 32'b0;
             rs_data_W <= 32'b0;
             rt_data_W <= 32'b0;
+            rs_data_W <= 32'b0;
+            rt_data_W <= 32'b0;
             ext_W     <= 32'b0;
             alu_out_W <= 32'b0;
             dm_out_W  <= 32'b0;
@@ -52,6 +56,8 @@ module W_reg (
         end else begin
             pc_W      <= in_pc;
             instr_W   <= in_instr;
+            rs_data_W <= in_rs_data;
+            rt_data_W <= in_rt_data;
             rs_data_W <= in_rs_data;
             rt_data_W <= in_rt_data;
             ext_W     <= in_ext;

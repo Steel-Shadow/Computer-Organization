@@ -6,6 +6,7 @@ module ALU (
     output [31:0] alu_out
 );
     reg [31:0] ans;
+    reg [ 4:0] temp;
 
     assign alu_out = ans;
 

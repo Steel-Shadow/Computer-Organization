@@ -5,6 +5,31 @@ addi
 
 删除了 reg_write 若reg_addr==0 则不写入
 
+--------
+格式	
+lwtbi rt, offset(base)
+111000
+
+描述	
+在 lw 指令的基础上，将要写入的寄存器的编号改为 rt 和访存结果前五位这两者无符号比较结果的最大值
+
+操作	
+vaddr ← GRF[base] + sign_extend(offset)
+
+paddr ← vaddr31...2 || 02
+
+memWord ← memory[paddr]
+
+index ← max(memWord[31:27], rt)
+
+GRF[index] ← memWord
+
+rs rt imm
+reg_addr_W 
+alu 出错?
+alu计算地址1 访存地址2 w写回判断地址3
+----------
+
 ## 指令添加流程
 
 必须确保 CU_D CU_E CU_M CU_W 都完成了指令译码！！！  

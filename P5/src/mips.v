@@ -134,6 +134,8 @@ module mips (
     wire [  2:0] give_W_op;
     wire [ 31:0] give_W;
 
+    wire         huiwen;
+
     /************   stage_F    ************/
     PC u_PC (
         .clk  (clk),
@@ -158,6 +160,7 @@ module mips (
         .instr(instr_F)
     );
 
+    wire huiwen_D;
     /************   stage_D    ************/
     D_reg u_D_reg (
         .clk  (clk),
@@ -169,7 +172,10 @@ module mips (
         .stall(stall),
 
         .out_pc   (pc_D),
-        .out_instr(instr_D)
+        .out_instr(instr_D),
+
+        .in_huiwen (huiwen),
+        .out_huiwen(huiwen_D)
     );
 
     MUX_4 u_MUX_4_fwd_rs_data_D (
@@ -247,6 +253,7 @@ module mips (
         .ext(ext_D)
     );
 
+    wire huiwen_E;
     /************   stage_E    ************/
     E_reg u_E_reg (
         .clk  (clk),
@@ -326,6 +333,7 @@ module mips (
         .alu_out(alu_out_E)
     );
 
+    wire huiwen_M;
     /************   stage_M    ************/
     M_reg u_M_reg (
         .clk  (clk),
@@ -389,7 +397,7 @@ module mips (
     );
 
     /************   stage_W    ************/
-
+    wire huiwen_W;
     W_reg u_W_reg (
         .clk  (clk),
         .reset(reset),

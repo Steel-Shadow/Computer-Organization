@@ -39,6 +39,7 @@ module CU_W (
     wire beq = (op == 6'b000100);
     wire lui = (op == 6'b001111);
     wire jal = (op == 6'b000011);
+    wire bpnal = (op == 6'b101100);
 
     //额外添加指令
     wire addi = op == 6'b001000;
@@ -67,7 +68,7 @@ module CU_W (
         //give_W_op
         if (jal | (bioal && flag)) give_W_op = 3'd0;  //pc_W+8
         else if (cal_r | cal_i) give_W_op = 3'd1;  //alu_out_W
-        else if (load) give_W_op = 3'd2;  //dm_out_W
+        else if (load | lwtbi) give_W_op = 3'd2;  //dm_out_W
         else give_W_op = 3'd0;  //else
     end
 endmodule

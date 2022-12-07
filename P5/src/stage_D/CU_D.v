@@ -95,12 +95,13 @@ module CU_D (
         if (beq | bioal) Tuse_rt = 2'd0;
         else if (cal_r) Tuse_rt = 2'd1;
         else if (store) Tuse_rt = 2'd2;
+        else if (lwtbi) Tuse_rt = 2'd3;
         else Tuse_rt = 2'd3;  //默认写回或不用
 
         /********* Tnew ************************/
         if (beq | jr | jal | bioal) Tnew = 2'd0;  //初始产生 不产生新数据
         else if (cal_r | cal_i) Tnew = 2'd1;
-        else if (load) Tnew = 2'd2;
+        else if (load | lwtbi) Tnew = 2'd2;
         else Tnew = 2'd0;  //默认初始产生 不产生新数据
 
         /********* stall ***********************/
