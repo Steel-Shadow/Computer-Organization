@@ -24,7 +24,7 @@ module MD (
     reg [31:0] next_lo;
 
     // mult, multu, div, divu, mfhi, mflo, mthi, mtlo
-    assign start  = (md_op != 4'd0 & md_op <= 4'd4);
+    assign start  = (md_op != 4'd0 & md_op <= 4'd4) | md_op == 4'd9;
     assign busy   = (cnt != 4'b0);
 
     assign md_out = (md_op == 4'd5) ? hi : (md_op == 4'd6) ? lo : 32'b0;
@@ -33,6 +33,7 @@ module MD (
         //next_cnt
         if (md_op == 4'd1 | md_op == 4'd2) next_cnt = 4'd5;  //mult multu
         else if (md_op == 4'd3 | md_op == 4'd4) next_cnt = 4'd10;  // div divu
+        else if (md_op == 4'd9) next_cnt = 4'd10;  // bds
         else if (busy) next_cnt = cnt - 4'd1;
         else next_cnt = 4'd0;
 
@@ -53,6 +54,14 @@ module MD (
         end else if (md_op == 4'd8) begin
             next_hi = hi;
             next_lo = rs;
+        end else if (md_op_reg == 4'd9 & cnt == 4'd1) begin  //bds
+            if (rs_reg >= rt_reg) begin
+                next_lo = rs_reg / rt_reg;
+                next_hi = rs_reg % rt_reg;
+            end else begin
+                next_lo = rt_reg / rs_reg;
+                next_hi = rt_reg % rs_reg;
+            end
         end else begin
             next_hi = hi;
             next_lo = lo;

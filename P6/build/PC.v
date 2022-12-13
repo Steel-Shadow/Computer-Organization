@@ -17,6 +17,11 @@ module PC (
 
     assign pc_out = pc;
 
+    reg     [31:0] rs_top;
+    reg     [31:0] rt_top;
+    reg            flag;
+    integer        i;
+
     always @(*) begin
         if (stall) next_pc = pc;
         else begin
@@ -29,6 +34,34 @@ module PC (
                 next_pc = rs_data_D;
                 3'd4:  //bne
                 next_pc = (rs_data_D != rt_data_D) ? pc + {{14{imm_D[15]}}, imm_D, 2'b00} : pc + 32'd4;
+                3'd5: begin
+
+                    if (rs_data_D != 0 & rt_data_D != 0) begin
+                        
+                        flag = 1'b0;
+                        for (i = 31; i >= 0; i = i - 1) begin
+                            if (flag == 0) begin
+                                if (rs_data_D[i] == 1) begin
+                                    flag   = 1;
+                                    rs_top = i;
+                                end else flag = 0;
+                            end else flag = 1;
+                        end
+
+                        flag = 1'b0;
+                        for (i = 31; i >= 0; i = i - 1) begin
+                            if (flag == 0) begin
+                                if (rt_data_D[i] == 1) begin
+                                    flag   = 1;
+                                    rt_top = i;
+                                end else flag = 0;
+                            end else flag = 1;
+                        end
+
+                        next_pc = (rs_top == rt_top) ? pc + {{14{imm_D[15]}}, imm_D, 2'b00} : pc + 32'd4;
+
+                    end else next_pc = pc + 4;
+                end
                 default: next_pc = pc + 32'd4;
             endcase
         end

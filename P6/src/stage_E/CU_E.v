@@ -18,7 +18,9 @@ module CU_E (
     input [1:0] Tnew_M,
 
     output reg [1:0] fwd_rs_data_E_op,
-    output reg [1:0] fwd_rt_data_E_op
+    output reg [1:0] fwd_rt_data_E_op,
+
+    output lwm
 );
     wire [5:0] op = instr[31:26];
     assign rs    = instr[25:21];
@@ -68,19 +70,25 @@ module CU_E (
     wire mthi = R & (func == 6'b010001);
     wire mtlo = R & (func == 6'b010011);
 
+    wire bds = R & (func == 6'b001010);
+
+    assign lwm = (op == 6'b101100);
+
+    wire btheq = (op == 6'b101111);
+
     //分类
     wire cal_r = (add | sub | sll | instr_and | instr_or | slt | sltu);
     wire cal_i = (ori | lui | addi | andi);
     wire load = (lw | lb | lh);
     wire store = (sw | sb | sh);
-    wire md = (mult | multu | div | divu);
+    wire md = (mult | multu | div | divu | bds);
 
     always @(*) begin
         //alu_op
         if (add) alu_op = 4'd0;
         else if (sub) alu_op = 4'd1;
         else if (ori) alu_op = 4'd2;
-        else if (load | store) alu_op = 4'd3;
+        else if (load | store | lwm) alu_op = 4'd3;
         else if (lui) alu_op = 4'd4;
         else if (sll) alu_op = 4'd5;
         else if (addi) alu_op = 4'd6;
@@ -100,6 +108,7 @@ module CU_E (
         else if (mflo) md_op = 4'd6;
         else if (mthi) md_op = 4'd7;
         else if (mtlo) md_op = 4'd8;
+        else if (bds) md_op = 4'd9;
         else md_op = 4'd0;
 
         //reg_addr 

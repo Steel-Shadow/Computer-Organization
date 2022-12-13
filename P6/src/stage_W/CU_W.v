@@ -10,7 +10,10 @@ module CU_W (
 
     output reg [4:0] reg_addr,
 
-    output reg [2:0] give_W_op
+    output reg [2:0] give_W_op,
+
+    input [31:0] dm_lwm,
+    input [31:0] rt_data
 );
     wire [5:0] op = instr[31:26];
     assign rs    = instr[25:21];
@@ -60,24 +63,32 @@ module CU_W (
     wire mthi = R & (func == 6'b010001);
     wire mtlo = R & (func == 6'b010011);
 
+    wire bds = R & (func == 6'b001010);
+
+    wire lwm = (op == 6'b101100);
+
+    wire btheq = (op == 6'b101111);
+
     wire cal_r = (add | sub | sll | instr_and | instr_or | slt | sltu);
     wire cal_i = (ori | lui | addi | andi);
     wire load = (lw | lb | lh);
     wire store = (sw | sb | sh);
-    wire md = (mult | multu | div | divu);
+    wire md = (mult | multu | div | divu | bds);
 
     always @(*) begin
         //reg_addr
         if (cal_r | mfhi | mflo) reg_addr = rd;  //rd
         else if (load | cal_i) reg_addr = rt;  //rt
         else if (jal) reg_addr = 5'd31;  //$ra $31
-        else reg_addr = 5'd0;  //$0
+        else if (lwm) begin
+            reg_addr = dm_lwm - rt_data;
+        end else reg_addr = 5'd0;  //$0
 
         //give_W_op 兼顾转发与reg_data
         if (jal) give_W_op = 3'd0;  //pc_W+8
         else if (cal_r | cal_i) give_W_op = 3'd1;  //alu_out_W
         else if (mfhi | mflo) give_W_op = 3'd2;  //md_out_W
-        else if (load) give_W_op = 3'd3;  //dm_out_W
+        else if (load | lwm) give_W_op = 3'd3;  //dm_out_W
         else give_W_op = 3'd0;  //else
     end
 endmodule

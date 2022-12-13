@@ -25,7 +25,10 @@ module CU_D (
     output reg stall,
 
     output reg [1:0] fwd_rs_data_D_op,
-    output reg [1:0] fwd_rt_data_D_op
+    output reg [1:0] fwd_rt_data_D_op,
+
+    input lwm_E,
+    input lwm_M
 );
     wire [5:0] op = instr[31:26];
     assign rs    = instr[25:21];
@@ -75,12 +78,18 @@ module CU_D (
     wire mthi = R & (func == 6'b010001);
     wire mtlo = R & (func == 6'b010011);
 
+    wire bds = R & (func == 6'b001010);
+
+    wire lwm = (op == 6'b101100);
+
+    wire btheq = (op == 6'b101111);
+
     //分组用于Tuse Tnew分析
     wire cal_r = (add | sub | sll | instr_and | instr_or | slt | sltu);
     wire cal_i = (ori | lui | addi | andi);
     wire load = (lw | lb | lh);
     wire store = (sw | sb | sh);
-    wire md = (mult | multu | div | divu);
+    wire md = (mult | multu | div | divu | bds);
     ;
     //stall
     reg [1:0] Tuse_rs;
@@ -96,10 +105,11 @@ module CU_D (
         else if (jal) next_pc_op = 3'd2;
         else if (jr) next_pc_op = 3'd3;
         else if (bne) next_pc_op = 3'd4;
+        else if (btheq) next_pc_op = 3'd5;
         else next_pc_op = 3'd0;
 
         /********* EXT *************************/
-        if (load | store | addi) ext_op = 3'd0;  //sign_ext imm
+        if (load | store | addi | lwm) ext_op = 3'd0;  //sign_ext imm
         else if (ori | lui | andi) ext_op = 3'd1;  //zero_ext imm
         else if (sll) ext_op = 3'd2;  //zero_ext shamt
         else ext_op = 3'd3;  //0 默认符号扩展imm
@@ -107,19 +117,20 @@ module CU_D (
         ///////////////////////// 冒险处理模块 //////////////////////////////////////
 
         /********* Tuse ************************/
-        if (beq | jr | bne) Tuse_rs = 2'd0;
-        else if ((cal_r & ~sll) | cal_i | load | store | md | mthi | mtlo) Tuse_rs = 2'd1;
+        if (beq | jr | bne | btheq) Tuse_rs = 2'd0;
+        else if ((cal_r & ~sll) | cal_i | load | store | md | mthi | mtlo | lwm) Tuse_rs = 2'd1;
         else Tuse_rs = 2'd3;  //默认写回或不用 虽然sll为cal_r但不用rs
 
-        if (beq | bne) Tuse_rt = 2'd0;
+        if (beq | bne | btheq) Tuse_rt = 2'd0;
         else if (cal_r | md) Tuse_rt = 2'd1;
         else if (store) Tuse_rt = 2'd2;
         else Tuse_rt = 2'd3;  //默认写回或不用
 
         /********* Tnew ************************/
-        if (beq | jr | jal | bne) Tnew = 2'd0;  //初始产生 不产生新数据
+        if (beq | jr | jal | bne | btheq) Tnew = 2'd0;  //初始产生 不产生新数据
         else if (cal_r | cal_i | mfhi | mflo) Tnew = 2'd1;
         else if (load) Tnew = 2'd2;
+        else if (lwm) Tnew = 2'd3;
         else Tnew = 2'd0;  //默认初始产生 不产生新数据
 
         /********* stall ***********************/
@@ -129,7 +140,7 @@ module CU_D (
         stall_rt_E = (Tuse_rt < Tnew_E) & (rt != 5'd0 & rt == reg_addr_E);
         stall_rt_M = (Tuse_rt < Tnew_M) & (rt != 5'd0 & rt == reg_addr_M);
 
-        stall      = (stall_rs_E | stall_rs_M) | (stall_rt_E | stall_rt_M) | ((busy | start) & (md | mfhi | mflo | mthi | mtlo));
+        stall      = (lwm_E | lwm_M) | (stall_rs_E | stall_rs_M) | (stall_rt_E | stall_rt_M) | ((busy | start) & (md | mfhi | mflo | mthi | mtlo));
 
         /********* forward ***********************/
         if (rs == reg_addr_E & rs != 5'd0 & Tnew_E == 2'b00) fwd_rs_data_D_op = 2'd3;

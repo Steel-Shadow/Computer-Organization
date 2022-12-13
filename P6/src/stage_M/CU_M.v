@@ -19,7 +19,9 @@ module CU_M (
     output reg [1:0] give_M_op,
 
     input      [4:0] reg_addr_W,
-    output reg       fwd_rt_data_M_op
+    output reg       fwd_rt_data_M_op,
+
+    output lwm
 );
     wire [5:0] op = instr[31:26];
     assign rs    = instr[25:21];
@@ -69,11 +71,17 @@ module CU_M (
     wire mthi = R & (func == 6'b010001);
     wire mtlo = R & (func == 6'b010011);
 
+    wire bds = R & (func == 6'b001010);
+
+    assign lwm = (op == 6'b101100);
+
+    wire btheq = (op == 6'b101111);
+
     wire cal_r = (add | sub | sll | instr_and | instr_or | slt | sltu);
     wire cal_i = (ori | lui | addi | andi);
     wire load = (lw | lb | lh);
     wire store = (sw | sb | sh);
-    wire md = (mult | multu | div | divu);
+    wire md = (mult | multu | div | divu | bds);
 
     always @(*) begin
         if (0) dm_op = 3'd1;  //无符号字节数据扩展
