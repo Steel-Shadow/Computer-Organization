@@ -470,12 +470,4 @@ module mips (
         .give_W_op(give_W_op)
     );
 
-    DASM Dasm (
-        .pc        (pc_W),
-        .instr     (instr_W),
-        .imm_as_dec(1'b1),
-        .reg_name  (1'b0),
-        .asm       ()
-    );
-
 endmodule

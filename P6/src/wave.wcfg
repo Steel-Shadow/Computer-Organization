@@ -10,7 +10,7 @@
          </top_modules>
       </db_ref>
    </db_ref_list>
-   <WVObjectSize size="19" />
+   <WVObjectSize size="18" />
    <wvobject fp_name="/mips_txt/clk" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -26,9 +26,11 @@
       <obj_property name="TextColor">230 230 230</obj_property>
    </wvobject>
    <wvobject fp_name="/mips_txt/uut/u_PC/pc" type="array" db_ref_id="1">
+      <obj_property name="DisplayName">label</obj_property>
       <obj_property name="ElementShortName">pc[31:0]</obj_property>
       <obj_property name="ObjectShortName">pc[31:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="label">pc_F</obj_property>
    </wvobject>
    <wvobject fp_name="divider18" type="divider">
       <obj_property name="label">D</obj_property>
@@ -38,14 +40,18 @@
       <obj_property name="Radix">HEXRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/mips_txt/uut/u_D_reg/pc_D" type="array" db_ref_id="1">
+      <obj_property name="DisplayName">label</obj_property>
       <obj_property name="ElementShortName">pc_D[31:0]</obj_property>
       <obj_property name="ObjectShortName">pc_D[31:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="label">pc_D</obj_property>
    </wvobject>
    <wvobject fp_name="/mips_txt/uut/u_D_reg/instr_D" type="array" db_ref_id="1">
+      <obj_property name="DisplayName">label</obj_property>
       <obj_property name="ElementShortName">instr_D[31:0]</obj_property>
       <obj_property name="ObjectShortName">instr_D[31:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="label">instr_D</obj_property>
    </wvobject>
    <wvobject fp_name="divider18" type="divider">
       <obj_property name="label">E</obj_property>
@@ -55,24 +61,28 @@
       <obj_property name="Radix">HEXRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/mips_txt/uut/u_E_reg/pc_E" type="array" db_ref_id="1">
+      <obj_property name="DisplayName">label</obj_property>
       <obj_property name="ElementShortName">pc_E[31:0]</obj_property>
       <obj_property name="ObjectShortName">pc_E[31:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="label">pc_E</obj_property>
    </wvobject>
    <wvobject fp_name="/mips_txt/uut/u_E_reg/instr_E" type="array" db_ref_id="1">
       <obj_property name="DisplayName">label</obj_property>
       <obj_property name="ElementShortName">instr_E[31:0]</obj_property>
       <obj_property name="ObjectShortName">instr_E[31:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
-      <obj_property name="label">instr_E[31:0]</obj_property>
+      <obj_property name="label">instr_E</obj_property>
    </wvobject>
    <wvobject fp_name="group49" type="group">
       <obj_property name="label">MD</obj_property>
       <obj_property name="DisplayName">label</obj_property>
       <wvobject fp_name="/mips_txt/uut/u_MD/md_op" type="array" db_ref_id="1">
+         <obj_property name="DisplayName">label</obj_property>
          <obj_property name="ElementShortName">md_op[3:0]</obj_property>
          <obj_property name="ObjectShortName">md_op[3:0]</obj_property>
          <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+         <obj_property name="label">md_op</obj_property>
       </wvobject>
       <wvobject fp_name="/mips_txt/uut/u_MD/start" type="logic" db_ref_id="1">
          <obj_property name="ElementShortName">start</obj_property>
@@ -116,23 +126,24 @@
       <obj_property name="Radix">HEXRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/mips_txt/uut/u_M_reg/pc_M" type="array" db_ref_id="1">
+      <obj_property name="DisplayName">label</obj_property>
       <obj_property name="ElementShortName">pc_M[31:0]</obj_property>
       <obj_property name="ObjectShortName">pc_M[31:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="label">pc_M</obj_property>
    </wvobject>
    <wvobject fp_name="/mips_txt/uut/u_M_reg/instr_M" type="array" db_ref_id="1">
+      <obj_property name="DisplayName">label</obj_property>
       <obj_property name="ElementShortName">instr_M[31:0]</obj_property>
       <obj_property name="ObjectShortName">instr_M[31:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="label">instr_M</obj_property>
    </wvobject>
    <wvobject fp_name="/mips_txt/uut/u_CU_M/reg_addr" type="array" db_ref_id="1">
+      <obj_property name="DisplayName">label</obj_property>
       <obj_property name="ElementShortName">reg_addr[4:0]</obj_property>
       <obj_property name="ObjectShortName">reg_addr[4:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/mips_txt/uut/u_CU_M/rd" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">rd[15:11]</obj_property>
-      <obj_property name="ObjectShortName">rd[15:11]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <obj_property name="label">reg_addr</obj_property>
    </wvobject>
    <wvobject fp_name="divider18" type="divider">
       <obj_property name="label">W</obj_property>
@@ -142,13 +153,17 @@
       <obj_property name="Radix">HEXRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/mips_txt/uut/u_W_reg/pc_W" type="array" db_ref_id="1">
+      <obj_property name="DisplayName">label</obj_property>
       <obj_property name="ElementShortName">pc_W[31:0]</obj_property>
       <obj_property name="ObjectShortName">pc_W[31:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="label">pc_W</obj_property>
    </wvobject>
    <wvobject fp_name="/mips_txt/uut/u_W_reg/instr_W" type="array" db_ref_id="1">
+      <obj_property name="DisplayName">label</obj_property>
       <obj_property name="ElementShortName">instr_W[31:0]</obj_property>
       <obj_property name="ObjectShortName">instr_W[31:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
+      <obj_property name="label">instr_W</obj_property>
    </wvobject>
 </wave_config>
