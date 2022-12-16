@@ -2,23 +2,30 @@ module mips (
     input clk,
     input reset,
 
-    output [31:0] i_inst_addr,    // IM 读取地址（取指 PC）
-    input  [31:0] i_inst_rdata,   // IM 读取数据
+    input         interrupt,       // 外部中断信号
+    output [31:0] macroscopic_pc,  // 宏观 PC
+    output [31:0] m_int_addr,      // 中断发生器待写入地址
+    output [ 3:0] m_int_byteen,    // 中断发生器字节使能信号
+
+    input  [31:0] i_inst_rdata,  //	I	i_inst_addr 对应的 32 位指令
+    output [31:0] i_inst_addr,   //	O	需要进行取指操作的流水级 PC（一般为 F 级）
+
     input  [31:0] m_data_rdata,   // I	数据存储器存储的相应数据
-    output [31:0] m_data_addr,    // O	待写�读出的数据存储器相应地址
+    output [31:0] m_data_addr,    // O	待写入/读出的数据存储器相应地址
     output [31:0] m_data_wdata,   // O	待写入数据存储器相应数据
     output [ 3:0] m_data_byteen,  // O	四位字节使能
-    output [31:0] m_inst_addr,    // O	M �PC
+    output [31:0] m_inst_addr,    // O	M 级 PC
 
     output        w_grf_we,
     output [ 4:0] w_grf_addr,
     output [31:0] w_grf_wdata,
     output [31:0] w_inst_addr
 );
-    /************   declaration    ************/
-    wire         lwm_E;
-    wire         lwm_M;
 
+    assign macroscopic_pc = pc_M;
+    assign m_int_addr     = m_data_addr;
+    assign m_int_byteen   = 4'b0000;
+    /************   declaration    ************/
     //////////////////////////////////////////// F
     wire [ 31:0] instr_F;
     wire [ 31:0] pc_F;
@@ -231,10 +238,8 @@ module mips (
         .stall(stall),
 
         .fwd_rs_data_D_op(fwd_rs_data_D_op),
-        .fwd_rt_data_D_op(fwd_rt_data_D_op),
+        .fwd_rt_data_D_op(fwd_rt_data_D_op)
 
-        .lwm_E(lwm_E),
-        .lwm_M(lwm_M)
     );
 
     GRF u_GRF (
@@ -248,7 +253,7 @@ module mips (
         .rs_data(rs_data_D),
         .rt_data(rt_data_D),
 
-        //stage_W写回
+        //stage_W写回 
         .reg_data(give_W),
         .reg_addr(reg_addr_W)  //隐含 reg_write
     );
@@ -328,9 +333,7 @@ module mips (
 
         .Tnew_M          (Tnew_M),
         .fwd_rs_data_E_op(fwd_rs_data_E_op),
-        .fwd_rt_data_E_op(fwd_rt_data_E_op),
-
-        .lwm(lwm_E)
+        .fwd_rt_data_E_op(fwd_rt_data_E_op)
     );
 
     ALU u_ALU (
@@ -413,9 +416,7 @@ module mips (
         .fwd_rt_data_M_op(fwd_rt_data_M_op),
         .reg_addr_W      (reg_addr_W),
 
-        .give_M_op(give_M_op),
-
-        .lwm(lwm_M)
+        .give_M_op(give_M_op)
     );
 
     assign m_data_addr = alu_out_M;  //DM
@@ -475,10 +476,7 @@ module mips (
         .j_address(j_address_W),
 
         .reg_addr (reg_addr_W),
-        .give_W_op(give_W_op),
-
-        .dm_lwm (dm_out_W),
-        .rt_data(rt_data_W)
+        .give_W_op(give_W_op)
     );
 
 endmodule
